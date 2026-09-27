@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Meet the founder of LIFEKit AI — why this site exists and what's next." />
+  <title>Founder — LIFEKit AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/home.css" />
+
+  <style>
+    /* ═══════════════════════════════════════════
+       FOUNDER PAGE — ANIMATED
+       ═══════════════════════════════════════════ */
+
+    /* ── FLOATING PARTICLES BACKGROUND ──── */
+    .particles {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #c026d3, #22d3ee);
+      opacity: 0;
+      animation: floatParticle linear infinite;
+    }
+    @keyframes floatParticle {
+      0% {
+        transform: translateY(100vh) translateX(0) scale(0);
+        opacity: 0;
+      }
+      10% { opacity: 0.7; }
+      50% {
+        transform: translateY(50vh) translateX(30px) scale(1);
+        opacity: 0.4;
+      }
+      90% { opacity: 0; }
+      100% {
+        transform: translateY(-100px) translateX(-30px) scale(0.5);
+        opacity: 0;
+      }
+    }
+
+    /* ── HERO ────────────────────────────── */
+    .founder-hero {
+      text-align: center;
+      padding: 60px 20px 30px;
+      max-width: 800px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .founder-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(168, 85, 247, 0.1);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      color: var(--primary-3);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: .78rem;
+      font-weight: 600;
+      letter-spacing: .02em;
+      opacity: 0;
+      animation: fadeSlideIn .8s ease forwards;
+      animation-delay: .1s;
+    }
+    .founder-badge .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--primary-2);
+      box-shadow: 0 0 8px var(--primary-2);
+      animation: pulse 2s infinite;
+    }
+
+    /* ── ANIMATED PHOTO RING ─────────────── */
+    .founder-photo-wrap {
+      width: 180px;
+      height: 180px;
+      margin: 30px auto 24px;
+      position: relative;
+      opacity: 0;
+      animation: popIn .8s cubic-bezier(.2,.8,.2,1) forwards;
+      animation-delay: .2s;
+    }
+
+    .founder-photo-ring {
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      background: conic-gradient(
+        from 0deg,
+        #c026d3,
+        #a855f7,
+        #22d3ee,
+        #a855f7,
+        #c026d3
+      );
+      animation: spin 6s linear infinite;
+      filter: blur(0.5px);
+    }
+
+    .founder-photo-ring::after {
+      content: '';
+      position: absolute;
+      inset: 6px;
+      border-radius: 50%;
+      background: var(--bg);
+    }
+
+    .founder-photo-glow {
+      position: absolute;
+      inset: -20px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(192, 38, 211, 0.4) 0%, transparent 70%);
+      filter: blur(20px);
+      animation: pulseGlow 3s ease-in-out infinite;
+      z-index: -1;
+    }
+
+    .founder-photo {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+      font-size: 4rem;
+      color: #fff;
+      font-weight: 800;
+      background: linear-gradient(135deg, #1a1530, #2d1b4e);
+      z-index: 1;
+    }
+
+    .founder-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.08); }
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.85); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── HEADING ─────────────────────────── */
+    .founder-hero h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 14px;
+      opacity: 0;
+      animation: fadeSlideIn .8s ease forwards;
+      animation-delay: .4s;
+    }
+
+    .founder-hero .subtitle {
+      color: var(--muted);
+      font-size: 1.1rem;
+      max-width: 560px;
+      margin: 0 auto;
+      opacity: 0;
+      animation: fadeSlideIn .8s ease forwards;
+      animation-delay: .5s;
+    }
+
+    /* ── SOCIAL LINKS ────────────────────── */
+    .founder-social {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 28px;
+      flex-wrap: wrap;
+      opacity: 0;
+      animation: fadeSlideIn .8s ease forwards;
+      animation-delay: .6s;
+    }
+    .founder-social a {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      background: var(--surface);
+      border: 1px solid var(--border-2);
+      display: grid;
+      place-items: center;
+      font-size: 1.2rem;
+      text-decoration: none;
+      color: var(--text);
+      transition: all .3s cubic-bezier(.2,.8,.2,1);
+    }
+    .founder-social a:hover {
+      transform: translateY(-4px) scale(1.05);
+      border-color: var(--primary);
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(34, 211, 238, 0.08));
+      box-shadow: 0 12px 32px rgba(192, 38, 211, 0.35);
+    }
+
+    /* ── CONTENT ─────────────────────────── */
+    .founder-content {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 20px 20px 80px;
+      font-size: 1.05rem;
+      line-height: 1.85;
+      color: var(--muted);
+      position: relative;
+      z-index: 1;
+    }
+
+    .founder-content > * {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity .7s ease, transform .7s cubic-bezier(.2,.8,.2,1);
+    }
+    .founder-content > *.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .founder-content h2 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--text);
+      margin: 48px 0 16px;
+      letter-spacing: -0.02em;
+    }
+    .founder-content h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text);
+      margin: 28px 0 12px;
+    }
+    .founder-content p { margin-bottom: 20px; }
+    .founder-content strong { color: var(--text); font-weight: 600; }
+    .founder-content a {
+      color: var(--primary-3);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .founder-content ul {
+      padding-left: 24px;
+      margin-bottom: 24px;
+    }
+    .founder-content li {
+      margin-bottom: 10px;
+      line-height: 1.8;
+    }
+
+    /* ── QUOTE ───────────────────────────── */
+    .founder-quote {
+      border-left: 3px solid var(--primary);
+      padding: 24px 28px;
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.08), rgba(34, 211, 238, 0.03));
+      border-radius: 0 16px 16px 0;
+      margin: 32px 0;
+      color: var(--text);
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 1.2rem;
+      line-height: 1.7;
+      position: relative;
+      overflow: hidden;
+    }
+    .founder-quote::before {
+      content: '"';
+      position: absolute;
+      top: -20px;
+      left: 12px;
+      font-size: 6rem;
+      font-family: 'Playfair Display', serif;
+      color: rgba(168, 85, 247, 0.15);
+      line-height: 1;
+    }
+
+    /* ── STATS ───────────────────────────── */
+    .founder-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+      margin: 36px 0;
+    }
+    .founder-stat {
+      background: linear-gradient(180deg, var(--surface), var(--surface-2));
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px 18px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: transform .3s cubic-bezier(.2,.8,.2,1),
+                  border-color .3s,
+                  box-shadow .3s;
+    }
+    .founder-stat::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--primary), transparent);
+      opacity: 0;
+      transition: opacity .4s;
+    }
+    .founder-stat:hover {
+      transform: translateY(-4px);
+      border-color: var(--primary);
+      box-shadow: 0 16px 40px rgba(192, 38, 211, 0.25);
+    }
+    .founder-stat:hover::before { opacity: 1; }
+
+    .founder-stat .num {
+      font-size: 2.2rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #c026d3, #a855f7, #22d3ee);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      display: block;
+    }
+    .founder-stat .label {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 600;
+    }
+
+    /* ── CTA ─────────────────────────────── */
+    .founder-cta {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.12), rgba(34, 211, 238, 0.06));
+      border: 1px solid var(--border-2);
+      border-radius: var(--radius-lg);
+      padding: 40px 32px;
+      text-align: center;
+      margin: 48px 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .founder-cta::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 30% 50%, rgba(192, 38, 211, 0.15), transparent 60%),
+                  radial-gradient(circle at 70% 50%, rgba(34, 211, 238, 0.1), transparent 60%);
+      animation: ctaGlow 6s ease-in-out infinite alternate;
+      pointer-events: none;
+    }
+    @keyframes ctaGlow {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.15); }
+    }
+    .founder-cta h3 {
+      color: var(--text);
+      font-size: 1.4rem;
+      margin-bottom: 12px;
+      position: relative;
+      z-index: 1;
+    }
+    .founder-cta p {
+      margin-bottom: 22px;
+      position: relative;
+      z-index: 1;
+      color: var(--muted);
+    }
+    .founder-cta .btn-primary {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── SIGNATURE ───────────────────────── */
+    .founder-signature {
+      margin-top: 40px;
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 1.15rem;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .founder-signature .title {
+      font-family: 'Inter', sans-serif;
+      font-style: normal;
+      font-size: 0.85rem;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      margin-top: 6px;
+    }
+
+    /* ── RESPONSIVE ──────────────────────── */
+    @media (max-width: 600px) {
+      .founder-hero { padding: 40px 20px 20px; }
+      .founder-photo-wrap { width: 140px; height: 140px; }
+      .founder-photo { font-size: 3rem; }
+      .founder-content { font-size: 1rem; padding: 20px 16px 60px; }
+      .founder-content h2 { font-size: 1.35rem; }
+      .founder-quote { font-size: 1.05rem; padding: 20px 20px; }
+      .founder-stat .num { font-size: 1.8rem; }
+      .founder-cta { padding: 32px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── FLOATING PARTICLES ──────────────── -->
+  <div class="particles" id="particles"></div>
+
+  <!-- ── CURSOR ──────────────────────────── -->
+  <div class="cursor-arrow" id="cursorArrow">
+    <svg viewBox="0 0 24 28" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="cursorGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#e9d5ff"/>
+          <stop offset="35%" stop-color="#c026d3"/>
+          <stop offset="70%" stop-color="#a855f7"/>
+          <stop offset="100%" stop-color="#22d3ee"/>
+        </linearGradient>
+      </defs>
+      <path d="M3 2 L3 22 L8.5 17 L12 24 L15 22.5 L11.5 15.5 L19 15 Z"
+            fill="url(#cursorGrad)" stroke="#ffffff" stroke-width="1.2"
+            stroke-linejoin="round" stroke-linecap="round"/>
+      <circle cx="4.5" cy="4.5" r="1.2" fill="#ffffff" opacity="0.95"/>
+    </svg>
+  </div>
+
+  <!-- ── NAVBAR ──────────────────────────── -->
+  <nav class="nav">
+    <a href="index.html" class="brand">
+      <span class="brand-mark">
+        <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="brandGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#c026d3"/>
+              <stop offset="50%" stop-color="#a855f7"/>
+              <stop offset="100%" stop-color="#22d3ee"/>
+            </linearGradient>
+          </defs>
+          <path d="M10 6 Q10 4 12 4 L18 4 Q20 4 20 6 L20 26 L30 26 Q32 26 32 28 L32 32 Q32 34 30 34 L12 34 Q10 34 10 32 Z"
+                fill="url(#brandGrad)" opacity="0.95"/>
+          <path d="M30 8 L32 12 L36 14 L32 16 L30 20 L28 16 L24 14 L28 12 Z"
+                fill="#e9d5ff" opacity="0.9"/>
+          <circle cx="24" cy="18" r="2" fill="#22d3ee"/>
+        </svg>
+      </span>
+      LIFEKit <span class="ai">AI</span>
+    </a>
+    <div class="nav-links">
+      <a href="tools.html">Tools</a>
+      <a href="about.html">About</a>
+      <a href="blog.html">Blog</a>
+      <a href="contact.html">Contact</a>
+    </div>
+  </nav>
+
+  <!-- ── HERO ────────────────────────────── -->
+  <header class="founder-hero">
+    <span class="founder-badge">
+      <span class="dot"></span>
+      Founder's Note
+    </span>
+
+    <div class="founder-photo-wrap">
+      <div class="founder-photo-glow"></div>
+      <div class="founder-photo-ring"></div>
+      <div class="founder-photo">
+        <img src="assets/founder.png" alt="Sanjaykumar" />
+      </div>
+    </div>
+
+    <h1>
+      Hi, I'm <span class="grad">Sanjaykumar</span>.
+    </h1>
+    <p class="subtitle">
+      I built LIFEKit AI to make everyday admin tasks suck less.
+    </p>
+
+    <div class="founder-social">
+      <a href="mailto:sanjaykumarnov12@gmail.com" title="Email">✉</a>
+      <a href="https://github.com/Sanjaykumar-tech" target="_blank" rel="noopener" title="GitHub">⌥</a>
+      <a href="#" title="Twitter / X">𝕏</a>
+      <a href="#" title="LinkedIn">in</a>
+    </div>
+  </header>
+
+  <!-- ── CONTENT ─────────────────────────── -->
+  <article class="founder-content">
+
+    <h2>Why I built this</h2>
+    <p>
+      In 2024, I watched my cousin spend <strong>two full weekends</strong> making her marriage biodata in MS Word. Formatting. Re-formatting. Sending to her mom for approval. Getting it back. Formatting again.
+    </p>
+    <p>
+      Then I watched her friend do the exact same thing a month later.
+    </p>
+    <p>
+      Same problem. Same time wasted. Same bad output.
+    </p>
+    <p>
+      I thought: <strong>why is this still hard in 2025?</strong> You fill a form, you get a beautiful PDF. That's it. It shouldn't take 4 hours.
+    </p>
+
+    <div class="founder-quote">
+      Most people don't need better software. They need software that solves one small thing, really well.
+    </div>
+
+    <h2>The problem with existing tools</h2>
+    <p>Most "biodata makers" online are:</p>
+    <ul>
+      <li><strong>Ugly</strong> — look like they were designed in 2008</li>
+      <li><strong>Expensive</strong> — ₹500+/month subscription for one PDF</li>
+      <li><strong>Confusing</strong> — sign up, verify email, choose plan, blah blah</li>
+      <li><strong>Full of ads</strong> — or force you to download random software</li>
+    </ul>
+    <p>
+      So I built the opposite: <strong>clean, fast, one-time payment, no signup</strong>.
+    </p>
+
+    <h2>How LIFEKit AI works</h2>
+    <p>Three simple tools:</p>
+    <ul>
+      <li><strong>💍 Biodata Maker</strong> — marriage biodata with 3 templates (₹99)</li>
+      <li><strong>💼 Resume Maker</strong> — ATS-friendly resume (₹49)</li>
+      <li><strong>❤️ Wishes Maker</strong> — birthday / love / anniversary cards (₹19)</li>
+    </ul>
+    <p>
+      Each does one thing well. Fill a form → preview live → download a PDF or image.
+    </p>
+    <p>
+      No signup. No monthly fee. No tracking beyond basic analytics. Just fill, preview, download.
+    </p>
+
+    <h2>Where we are now</h2>
+    <div class="founder-stats">
+      <div class="founder-stat">
+        <span class="num" data-count="3">0</span>
+        <div class="label">Tools live</div>
+      </div>
+      <div class="founder-stat">
+        <span class="num">₹19+</span>
+        <div class="label">Starting price</div>
+      </div>
+      <div class="founder-stat">
+        <span class="num" data-count="0">0</span>
+        <div class="label">Subscriptions</div>
+      </div>
+      <div class="founder-stat">
+        <span class="num">100%</span>
+        <div class="label">Made in India</div>
+      </div>
+    </div>
+
+    <h2>What's next</h2>
+    <p>More tools are coming:</p>
+    <ul>
+      <li>📄 <strong>Invoice Maker</strong> — for freelancers</li>
+      <li>✉️ <strong>Cover Letter Maker</strong> — for job seekers</li>
+      <li>🎓 <strong>Notes Maker</strong> — for students</li>
+      <li>🎨 <strong>Invitation Maker</strong> — for events</li>
+    </ul>
+    <p>
+      Same philosophy: fill a form, get a beautiful output, pay once.
+    </p>
+
+    <h2>How you can help</h2>
+    <p>If you've used LIFEKit AI and it saved you time:</p>
+    <ul>
+      <li><strong>Share it</strong> with someone who needs it</li>
+      <li><strong>Send feedback</strong> — what worked, what didn't</li>
+      <li><strong>Suggest a tool</strong> — what else should we build?</li>
+    </ul>
+    <p>
+      Every message goes to my inbox. I read all of them.
+    </p>
+
+    <div class="founder-cta">
+      <h3>Reach out</h3>
+      <p>Questions, feedback, or just want to say hi?</p>
+      <a href="contact.html" class="btn-primary">Contact me →</a>
+    </div>
+
+    <h2>Thanks for being here</h2>
+    <p>
+      If you've made it this far, thank you. Building a website is easy. Getting people to actually use it is the hard part.
+    </p>
+    <p>
+      If LIFEKit AI helps you in any small way, that's the whole point.
+    </p>
+
+    <div class="founder-signature">
+      — Sanjaykumar
+      <div class="title">Founder, LIFEKit AI · Ulundurpet, Tamil Nadu</div>
+    </div>
+
+  </article>
+
+  <!-- ── FOOTER ──────────────────────────── -->
+  <footer class="footer">
+    <div class="footer-grid">
+      <div>
+        <div class="brand" style="margin-bottom: 14px;">
+          <span class="brand-mark">
+            <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 6 Q10 4 12 4 L18 4 Q20 4 20 6 L20 26 L30 26 Q32 26 32 28 L32 32 Q32 34 30 34 L12 34 Q10 34 10 32 Z"
+                    fill="url(#brandGrad)" opacity="0.95"/>
+              <circle cx="24" cy="18" r="2" fill="#22d3ee"/>
+            </svg>
+          </span>
+          LIFEKit <span class="ai">AI</span>
+        </div>
+        <p style="color: var(--muted); font-size: .9rem; max-width: 280px;">
+          Small tools. Big time saved. Built for real life.
+        </p>
+      </div>
+      <div>
+        <h4>Tools</h4>
+        <ul>
+          <li><a href="tools/biodata.html">Biodata Maker</a></li>
+          <li><a href="tools/resume.html">Resume Maker</a></li>
+          <li><a href="tools/wishes.html">Wishes Maker</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul>
+          <li><a href="about.html">About</a></li>
+          <li><a href="founder.html">Founder</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="blog.html">Blog</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="privacy.html">Privacy</a></li>
+          <li><a href="terms.html">Terms</a></li>
+          <li><a href="refunds.html">Refunds</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 LIFEKit AI</span>
+      <span>Made with 💜 in India</span>
+    </div>
+  </footer>
+
+  <script src="js/cursor.js" defer></script>
+
+  <script>
+    // ═══════════════════════════════════════════
+    //   FLOATING PARTICLES
+    // ═══════════════════════════════════════════
+    (function () {
+      const container = document.getElementById('particles');
+      if (!container) return;
+
+      const PARTICLE_COUNT = 25;
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.style.left = Math.random() * 100 + '%';
+        p.style.animationDuration = (8 + Math.random() * 12) + 's';
+        p.style.animationDelay = (Math.random() * 15) + 's';
+        p.style.width = p.style.height = (2 + Math.random() * 4) + 'px';
+        container.appendChild(p);
+      }
+    })();
+
+    // ═══════════════════════════════════════════
+    //   SCROLL REVEAL FOR CONTENT
+    // ═══════════════════════════════════════════
+    (function () {
+      const elements = document.querySelectorAll('.founder-content > *');
+      if (!elements.length) return;
+
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('revealed');
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+      elements.forEach(el => io.observe(el));
+    })();
+
+    // ═══════════════════════════════════════════
+    //   ANIMATED COUNTERS (stats)
+    // ═══════════════════════════════════════════
+    (function () {
+      const counters = document.querySelectorAll('[data-count]');
+      if (!counters.length) return;
+
+      const animateCount = (el) => {
+        const target = parseInt(el.dataset.count, 10);
+        if (isNaN(target)) return;
+        const duration = 1200;
+        const start = performance.now();
+        const initial = 0;
+
+        function frame(now) {
+          const elapsed = now - start;
+          const progress = Math.min(elapsed / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+          el.textContent = Math.round(initial + (target - initial) * eased);
+          if (progress < 1) requestAnimationFrame(frame);
+        }
+        requestAnimationFrame(frame);
+      };
+
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            animateCount(entry.target);
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.5 });
+
+      counters.forEach(el => io.observe(el));
+    })();
+  </script>
+
+</body>
+</html>

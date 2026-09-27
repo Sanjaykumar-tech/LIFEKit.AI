@@ -69,44 +69,59 @@
   <section class="section" style="max-width: 600px;">
     <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 32px;">
 
-      <div style="display: flex; flex-direction: column; gap: 18px;">
+      <form id="contactForm" action="https://api.web3forms.com/submit" method="POST"
+            style="display: flex; flex-direction: column; gap: 18px;">
+
+        <!-- Web3Forms access key (required) -->
+        <input type="hidden" name="access_key" value="6fe25a55-2d99-48ef-8a2d-09419d7d4631" />
+
+        <!-- Optional subject prefix -->
+        <input type="hidden" name="from_name" value="LIFEKit Contact Form" />
+
+        <!-- Anti-spam honeypot (do NOT fill) -->
+        <input type="checkbox" name="botcheck" style="display:none;" />
 
         <label style="display: flex; flex-direction: column; gap: 8px;">
           <span style="font-size: .85rem; color: var(--muted); font-weight: 500;">Your Name *</span>
-          <input type="text" id="cName" placeholder="Priya Sharma"
+          <input type="text" name="name" required
+                 placeholder="Priya Sharma"
                  style="background: var(--bg); border: 1px solid var(--border-2); border-radius: 10px; padding: 12px 14px; color: var(--text); font-family: inherit; font-size: .95rem; outline: none;" />
         </label>
 
         <label style="display: flex; flex-direction: column; gap: 8px;">
           <span style="font-size: .85rem; color: var(--muted); font-weight: 500;">Email *</span>
-          <input type="email" id="cEmail" placeholder="you@example.com"
+          <input type="email" name="email" required
+                 placeholder="you@example.com"
                  style="background: var(--bg); border: 1px solid var(--border-2); border-radius: 10px; padding: 12px 14px; color: var(--text); font-family: inherit; font-size: .95rem; outline: none;" />
         </label>
 
         <label style="display: flex; flex-direction: column; gap: 8px;">
           <span style="font-size: .85rem; color: var(--muted); font-weight: 500;">Subject</span>
-          <input type="text" id="cSubject" placeholder="How can we help?"
+          <input type="text" name="subject"
+                 placeholder="How can we help?"
                  style="background: var(--bg); border: 1px solid var(--border-2); border-radius: 10px; padding: 12px 14px; color: var(--text); font-family: inherit; font-size: .95rem; outline: none;" />
         </label>
 
         <label style="display: flex; flex-direction: column; gap: 8px;">
           <span style="font-size: .85rem; color: var(--muted); font-weight: 500;">Message *</span>
-          <textarea id="cMessage" rows="6" placeholder="Tell us what's on your mind..."
+          <textarea name="message" rows="6" required
+                    placeholder="Tell us what's on your mind..."
                     style="background: var(--bg); border: 1px solid var(--border-2); border-radius: 10px; padding: 12px 14px; color: var(--text); font-family: inherit; font-size: .95rem; outline: none; resize: vertical;"></textarea>
         </label>
 
-        <button class="btn-primary" id="cSubmit" style="padding: 14px 24px; font-size: 1rem; width: 100%;">
+        <button class="btn-primary" type="submit" id="cSubmit"
+                style="padding: 14px 24px; font-size: 1rem; width: 100%;">
           Send Message →
         </button>
 
         <div id="cStatus" style="text-align: center; font-size: .9rem; color: var(--muted); margin-top: 8px;"></div>
-      </div>
+      </form>
     </div>
 
     <!-- Direct contact -->
     <div style="text-align: center; margin-top: 40px; color: var(--muted);">
       <p style="margin-bottom: 8px;">Or email us directly:</p>
-      <p><a href="mailto:hello@lifekit.ai" style="color: var(--primary-3); font-weight: 600; font-size: 1.1rem;">hello@lifekit.ai</a></p>
+      <p><a href="mailto:sanjaykumarnov12@gmail.com" style="color: var(--primary-3); font-weight: 600; font-size: 1.1rem;">sanjaykumarnov12@gmail.com</a></p>
     </div>
   </section>
 
@@ -162,29 +177,59 @@
   </footer>
 
   <script src="js/cursor.js" defer></script>
+
+  <!-- CONTACT FORM — Web3Forms AJAX submission -->
   <script>
-    // Simple contact form — opens user's email client with pre-filled content
-    document.getElementById('cSubmit').addEventListener('click', () => {
-      const name    = document.getElementById('cName').value.trim();
-      const email   = document.getElementById('cEmail').value.trim();
-      const subject = document.getElementById('cSubject').value.trim() || 'Contact from LIFEKit AI';
-      const message = document.getElementById('cMessage').value.trim();
-      const status  = document.getElementById('cStatus');
+    (function () {
+      const form = document.getElementById('contactForm');
+      const status = document.getElementById('cStatus');
+      const btn = document.getElementById('cSubmit');
+      if (!form || !btn) return;
 
-      if (!name || !email || !message) {
-        status.style.color = '#ef4444';
-        status.textContent = 'Please fill name, email, and message.';
-        return;
-      }
+      const originalText = btn.textContent;
 
-      // Open default email client
-      const body = `Name: ${name}%0AEmail: ${email}%0A%0A${message}`;
-      const mailto = `mailto:hello@lifekit.ai?subject=${encodeURIComponent(subject)}&body=${body}`;
-      window.location.href = mailto;
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-      status.style.color = '#4ade80';
-      status.textContent = '✓ Opening your email app…';
-    });
+        btn.disabled = true;
+        btn.textContent = 'Sending…';
+        status.style.color = 'var(--muted)';
+        status.textContent = '';
+
+        try {
+          const formData = new FormData(form);
+          const response = await fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: { 'Accept': 'application/json' }
+          });
+
+          const data = await response.json();
+
+          if (response.ok && data.success) {
+            status.style.color = '#4ade80';
+            status.textContent = '✓ Message sent! We\'ll reply within 24 hours.';
+            btn.textContent = '✓ Sent';
+            form.reset();
+
+            setTimeout(() => {
+              btn.disabled = false;
+              btn.textContent = originalText;
+              status.textContent = '';
+            }, 5000);
+          } else {
+            throw new Error(data.message || 'Submission failed');
+          }
+        } catch (err) {
+          console.error('[Contact] Error:', err);
+          status.style.color = '#ef4444';
+          status.textContent = '✗ Something went wrong. Email us at sanjaykumarnov12@gmail.com';
+          btn.disabled = false;
+          btn.textContent = originalText;
+        }
+      });
+    })();
   </script>
+
 </body>
 </html>

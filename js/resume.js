@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════
    LIFEKit AI — Resume Maker
-   Native jsPDF output (real text, no screenshots)
+   Native jsPDF + form validation
    ═══════════════════════════════════════════ */
 
 (function () {
@@ -18,10 +18,51 @@
     paid: false,
   };
 
-  const preview   = $('preview');
+  const preview = $('preview');
   const watermark = $('watermark');
 
-  // ── TEMPLATE SWITCH ───────────────────
+  // ═══════════════════════════════════════════
+  //   FORM VALIDATION
+  // ═══════════════════════════════════════════
+
+  function isFormValid() {
+    const name = ($('name')?.value || '').trim();
+    return name.length >= 2;
+  }
+
+  function updateUnlockButton() {
+    const btn = $('downloadBtn');
+    const navBtn = $('navDownload');
+    if (!btn) return;
+
+    const paid = state.paid || (window.LIFEKitPayment && window.LIFEKitPayment.isPaid('resume'));
+    const valid = isFormValid();
+
+    if (paid) {
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.style.cursor = 'pointer';
+      btn.textContent = '⬇ Download PDF';
+      if (navBtn) navBtn.textContent = 'Download PDF';
+    } else if (!valid) {
+      btn.disabled = true;
+      btn.style.opacity = '0.5';
+      btn.style.cursor = 'not-allowed';
+      btn.textContent = '✏️ Enter name to unlock';
+      if (navBtn) navBtn.textContent = 'Enter name first';
+    } else {
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.style.cursor = 'pointer';
+      btn.textContent = '🔓 Unlock HD PDF — ₹49';
+      if (navBtn) navBtn.textContent = 'Download ₹49';
+    }
+  }
+
+  // ═══════════════════════════════════════════
+  //   TEMPLATE SWITCH
+  // ═══════════════════════════════════════════
+
   document.querySelectorAll('.template-card').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.template-card').forEach(b => b.classList.remove('active'));
@@ -31,12 +72,21 @@
     });
   });
 
-  // ── SIMPLE FIELDS ─────────────────────
+  // ═══════════════════════════════════════════
+  //   SIMPLE FIELDS
+  // ═══════════════════════════════════════════
+
   ['name','jobTitle','email','phone','location','website','summary'].forEach(id => {
-    $(id)?.addEventListener('input', render);
+    $(id)?.addEventListener('input', () => {
+      render();
+      updateUnlockButton();
+    });
   });
 
-  // ── LIST CONFIG ───────────────────────
+  // ═══════════════════════════════════════════
+  //   DYNAMIC LISTS
+  // ═══════════════════════════════════════════
+
   const listConfigs = {
     experience: {
       container: 'experienceList',
@@ -94,9 +144,7 @@
     const container = $(config.container);
     if (!container) return;
 
-    container.innerHTML = state[type].map((item, i) =>
-      makeItemHTML(config, i, item)
-    ).join('');
+    container.innerHTML = state[type].map((item, i) => makeItemHTML(config, i, item)).join('');
 
     container.querySelectorAll('.rs-item').forEach(el => {
       const idx = +el.dataset.index;
@@ -127,7 +175,10 @@
     });
   });
 
-  // ── SKILLS ────────────────────────────
+  // ═══════════════════════════════════════════
+  //   SKILLS
+  // ═══════════════════════════════════════════
+
   const skillInput = $('skillInput');
   const skillsChips = $('skillsChips');
 
@@ -152,6 +203,7 @@
         <button data-skill-index="${i}" title="Remove">✕</button>
       </span>
     `).join('');
+
     skillsChips.querySelectorAll('[data-skill-index]').forEach(btn => {
       btn.addEventListener('click', () => {
         state.skills.splice(+btn.dataset.skillIndex, 1);
@@ -161,12 +213,18 @@
     });
   }
 
-  // ── HELPERS ───────────────────────────
+  // ═══════════════════════════════════════════
+  //   HELPERS
+  // ═══════════════════════════════════════════
+
   const esc = str => String(str || '')
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
-  // ── RENDER PREVIEW ────────────────────
+  // ═══════════════════════════════════════════
+  //   RENDER PREVIEW
+  // ═══════════════════════════════════════════
+
   function render() {
     const v = id => ($(id)?.value || '').trim();
 
@@ -234,11 +292,7 @@
         ${contacts.length ? `<div class="rs-doc-contact">${contacts.map(c => `<span>${c}</span>`).join('')}</div>` : ''}
       </div>
 
-      ${summary ? `
-        <div class="rs-doc-section"><h2>Summary</h2>
-          <div class="rs-doc-summary">${esc(summary).replace(/\n/g, '<br>')}</div>
-        </div>` : ''}
-
+      ${summary ? `<div class="rs-doc-section"><h2>Summary</h2><div class="rs-doc-summary">${esc(summary).replace(/\n/g, '<br>')}</div></div>` : ''}
       ${expHTML ? `<div class="rs-doc-section"><h2>Experience</h2>${expHTML}</div>` : ''}
       ${eduHTML ? `<div class="rs-doc-section"><h2>Education</h2>${eduHTML}</div>` : ''}
       ${skillsHTML ? `<div class="rs-doc-section"><h2>Skills</h2><div class="rs-doc-skills">${skillsHTML}</div></div>` : ''}
@@ -251,10 +305,16 @@
     `;
   }
 
-  // ── WATERMARK ─────────────────────────
-  $('previewBtn')?.addEventListener('click', () => watermark.classList.toggle('hidden'));
+  // ═══════════════════════════════════════════
+  //   WATERMARK TOGGLE
+  // ═══════════════════════════════════════════
 
-  // ── FULLSCREEN ────────────────────────
+  $('previewBtn')?.addEventListener('click', () => watermark?.classList.toggle('hidden'));
+
+  // ═══════════════════════════════════════════
+  //   FULLSCREEN
+  // ═══════════════════════════════════════════
+
   $('fullscreenBtn')?.addEventListener('click', () => {
     const clone = preview.cloneNode(true);
     const fs = document.createElement('div');
@@ -266,7 +326,10 @@
     fs.addEventListener('click', e => { if (e.target === fs) fs.remove(); });
   });
 
-  // ── RESET ─────────────────────────────
+  // ═══════════════════════════════════════════
+  //   RESET
+  // ═══════════════════════════════════════════
+
   $('resetBtn')?.addEventListener('click', () => {
     if (!confirm('Clear everything?')) return;
     ['name','jobTitle','email','phone','location','website','summary','skillInput'].forEach(id => {
@@ -281,11 +344,13 @@
     renderList('education');
     renderList('project');
     render();
+    updateUnlockButton();
   });
 
   // ═══════════════════════════════════════════
-  //   PDF GENERATION — native jsPDF
+  //   PDF GENERATION
   // ═══════════════════════════════════════════
+
   async function downloadPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
@@ -301,17 +366,14 @@
     const M = 16;
     const CONTENT_W = PAGE_W - M * 2;
 
-    // Background
     doc.setFillColor(...c.bg);
     doc.rect(0, 0, PAGE_W, PAGE_H, 'F');
 
-    // Top accent bar
     doc.setFillColor(...c.primary);
     doc.rect(0, 0, PAGE_W, 3, 'F');
 
     let y = M + 6;
 
-    // ── HEADER ──
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(22);
     doc.setTextColor(...c.dark);
@@ -324,7 +386,6 @@
     doc.text($('jobTitle')?.value || '', M, y);
     y += 5;
 
-    // Contact line
     const contacts = [];
     if ($('email')?.value)    contacts.push($('email').value);
     if ($('phone')?.value)    contacts.push($('phone').value);
@@ -338,13 +399,11 @@
       y += 5;
     }
 
-    // Divider
     doc.setDrawColor(...c.primary);
     doc.setLineWidth(0.4);
     doc.line(M, y, PAGE_W - M, y);
     y += 7;
 
-    // ── Helpers ──
     function checkOverflow(needed = 20) {
       if (y + needed > PAGE_H - 15) {
         doc.addPage();
@@ -381,25 +440,21 @@
       });
     }
 
-    // ── SUMMARY ──
     if ($('summary')?.value?.trim()) {
       sectionHead('Summary');
       para($('summary').value.trim());
       y += 4;
     }
 
-    // ── EXPERIENCE ──
     const exps = state.experience.filter(e => e.role || e.company);
     if (exps.length) {
       sectionHead('Experience');
       exps.forEach(e => {
         checkOverflow(20);
-
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(11);
         doc.setTextColor(...c.dark);
         doc.text(e.role || '', M, y);
-
         if (e.from || e.to) {
           doc.setFont('helvetica', 'normal');
           doc.setFontSize(9);
@@ -408,7 +463,6 @@
           doc.text(range, PAGE_W - M, y, { align: 'right' });
         }
         y += 4.6;
-
         if (e.company) {
           doc.setFont('helvetica', 'italic');
           doc.setFontSize(9.5);
@@ -416,27 +470,20 @@
           doc.text(e.company, M, y);
           y += 4.5;
         }
-
-        if (e.description) {
-          para(e.description, 9.5, [70, 70, 80], 3);
-        }
-
+        if (e.description) para(e.description, 9.5, [70, 70, 80], 3);
         y += 3;
       });
     }
 
-    // ── EDUCATION ──
     const edus = state.education.filter(e => e.degree || e.school);
     if (edus.length) {
       sectionHead('Education');
       edus.forEach(e => {
         checkOverflow(18);
-
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(11);
         doc.setTextColor(...c.dark);
         doc.text(e.degree || '', M, y);
-
         if (e.from || e.to) {
           doc.setFont('helvetica', 'normal');
           doc.setFontSize(9);
@@ -445,7 +492,6 @@
           doc.text(range, PAGE_W - M, y, { align: 'right' });
         }
         y += 4.6;
-
         if (e.school) {
           doc.setFont('helvetica', 'italic');
           doc.setFontSize(9.5);
@@ -464,31 +510,21 @@
       });
     }
 
-    // ── SKILLS ──
     if (state.skills.length) {
       sectionHead('Skills');
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(10);
-      doc.setTextColor(...c.dark);
-
-      // Wrap chips as a comma list — cleaner than manual chips in PDF
-      const skillsText = state.skills.join('   •   ');
-      para(skillsText, 10);
+      para(state.skills.join('   •   '), 10);
       y += 4;
     }
 
-    // ── PROJECTS ──
     const projs = state.projects.filter(p => p.name);
     if (projs.length) {
       sectionHead('Projects');
       projs.forEach(p => {
         checkOverflow(18);
-
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(11);
         doc.setTextColor(...c.dark);
         doc.text(p.name || '', M, y);
-
         if (p.tech) {
           doc.setFont('helvetica', 'normal');
           doc.setFontSize(9);
@@ -496,22 +532,17 @@
           doc.text(p.tech, PAGE_W - M, y, { align: 'right' });
         }
         y += 4.6;
-
-        if (p.description) {
-          para(p.description, 9.5, [70, 70, 80], 3);
-        }
+        if (p.description) para(p.description, 9.5, [70, 70, 80], 3);
         y += 3;
       });
     }
 
-    // ── FOOTER ──
     const pageCount = doc.internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
       doc.setDrawColor(220, 220, 220);
       doc.setLineWidth(0.2);
       doc.line(M, PAGE_H - 12, PAGE_W - M, PAGE_H - 12);
-
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(7.5);
       doc.setTextColor(150, 150, 155);
@@ -519,65 +550,44 @@
       doc.text(`Page ${i} / ${pageCount}`, PAGE_W - M, PAGE_H - 7, { align: 'right' });
     }
 
-    // ── SAVE ──
     const safeName = ($('name')?.value || 'lifekit').trim().replace(/\s+/g, '-').toLowerCase();
     doc.save(`resume-${safeName}.pdf`);
   }
 
-  // ── DOWNLOAD BUTTON ───────────────────
-    // ── DOWNLOAD BUTTON ───────────────────
+  // ═══════════════════════════════════════════
+  //   DOWNLOAD BUTTON
+  // ═══════════════════════════════════════════
+
   function handleDownload() {
-    if (state.paid || window.LIFEKitPayment.isPaid('resume')) {
+    if (!state.paid && !(window.LIFEKitPayment && window.LIFEKitPayment.isPaid('resume'))) {
+      if (!isFormValid()) {
+        alert('Please enter your full name first.');
+        $('name')?.focus();
+        return;
+      }
+    }
+
+    if (state.paid || (window.LIFEKitPayment && window.LIFEKitPayment.isPaid('resume'))) {
       state.paid = true;
-      setButtonState('paid');
+      updateUnlockButton();
       return downloadPDF();
     }
 
     const customerName = $('name')?.value || '';
 
+    if (!window.LIFEKitPayment) {
+      alert('Payment system not loaded. Please refresh.');
+      return;
+    }
+
     window.LIFEKitPayment.openCheckout('resume', customerName, {
       onSuccess: () => {
         state.paid = true;
-        setButtonState('paid');
+        updateUnlockButton();
         setTimeout(() => downloadPDF(), 600);
       },
-      onCancel: () => {
-        setButtonState('default');
-      },
+      onCancel: () => updateUnlockButton(),
     });
-
-    setButtonState('processing');
-  }
-
-  function setButtonState(stateName) {
-    const btn = $('downloadBtn');
-    const navBtn = $('navDownload');
-    if (!btn) return;
-
-    if (stateName === 'processing') {
-      btn.disabled = true;
-      btn.textContent = 'Opening payment…';
-    } else if (stateName === 'paid') {
-      btn.disabled = false;
-      btn.textContent = '⬇ Download PDF';
-      if (navBtn) navBtn.textContent = 'Download PDF';
-    } else {
-      btn.disabled = false;
-      btn.textContent = '🔓 Unlock HD PDF — ₹49';
-    }
-  }
-
-  window.addEventListener('lifekit:paid', (e) => {
-    if (e.detail.product === 'resume') {
-      state.paid = true;
-      setButtonState('paid');
-      setTimeout(() => downloadPDF(), 800);
-    }
-  });
-
-  if (window.LIFEKitPayment?.isPaid('resume')) {
-    state.paid = true;
-    setButtonState('paid');
   }
 
   $('downloadBtn')?.addEventListener('click', handleDownload);
@@ -585,14 +595,27 @@
     e.preventDefault();
     handleDownload();
   });
-  
-  // ── KEYBOARD ──────────────────────────
+
   document.addEventListener('keydown', e => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); handleDownload(); }
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault();
+      handleDownload();
+    }
     if (e.key === 'Escape') document.querySelector('.preview-fullscreen')?.remove();
   });
 
-  // ── INIT ──────────────────────────────
+  window.addEventListener('lifekit:paid', (e) => {
+    if (e.detail.product === 'resume') {
+      state.paid = true;
+      updateUnlockButton();
+      setTimeout(() => downloadPDF(), 800);
+    }
+  });
+
+  // ═══════════════════════════════════════════
+  //   INIT
+  // ═══════════════════════════════════════════
+
   state.experience.push({ role: '', company: '', from: '', to: '', description: '' });
   state.education.push({ degree: '', school: '', from: '', to: '', score: '' });
   state.projects.push({ name: '', tech: '', description: '' });
@@ -602,5 +625,10 @@
   renderList('project');
   renderSkills();
   render();
+
+  if (window.LIFEKitPayment && window.LIFEKitPayment.isPaid('resume')) {
+    state.paid = true;
+  }
+  updateUnlockButton();
 
 })();

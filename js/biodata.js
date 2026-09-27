@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════
    LIFEKit AI — Biodata Maker
-   Native jsPDF output (real text, no screenshots)
+   Native jsPDF output + form validation
    ═══════════════════════════════════════════ */
 
 (function () {
@@ -15,19 +15,60 @@
     paid: false,
   };
 
-  const preview   = $('preview');
-  const watermark = $('watermark');
+  const preview    = $('preview');
+  const watermark  = $('watermark');
   const photoInput = $('photoInput');
   const photoDrop  = $('photoDrop');
 
-  const fields = [
+  const FIELDS = [
     'name','dob','height','religion','language','marital',
     'education','college','job','income',
     'father','fatherJob','mother','motherJob','siblings',
     'phone','email','address'
   ];
 
-  // ── TEMPLATE SWITCH ───────────────────
+  // ═══════════════════════════════════════════
+  //   FORM VALIDATION
+  // ═══════════════════════════════════════════
+
+  function isFormValid() {
+    const name = ($('name')?.value || '').trim();
+    return name.length >= 2;
+  }
+
+  function updateUnlockButton() {
+    const btn = $('downloadBtn');
+    const navBtn = $('navDownload');
+    if (!btn) return;
+
+    const paid = state.paid || (window.LIFEKitPayment && window.LIFEKitPayment.isPaid('biodata'));
+    const valid = isFormValid();
+
+    if (paid) {
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.style.cursor = 'pointer';
+      btn.textContent = '⬇ Download PDF';
+      if (navBtn) navBtn.textContent = 'Download PDF';
+    } else if (!valid) {
+      btn.disabled = true;
+      btn.style.opacity = '0.5';
+      btn.style.cursor = 'not-allowed';
+      btn.textContent = '✏️ Enter name to unlock';
+      if (navBtn) navBtn.textContent = 'Enter name first';
+    } else {
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.style.cursor = 'pointer';
+      btn.textContent = '🔓 Unlock HD PDF — ₹99';
+      if (navBtn) navBtn.textContent = 'Download ₹99';
+    }
+  }
+
+  // ═══════════════════════════════════════════
+  //   TEMPLATE SWITCH
+  // ═══════════════════════════════════════════
+
   document.querySelectorAll('.template-card').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.template-card').forEach(b => b.classList.remove('active'));
@@ -37,27 +78,41 @@
     });
   });
 
-  // ── PHOTO UPLOAD ──────────────────────
+  // ═══════════════════════════════════════════
+  //   PHOTO UPLOAD
+  // ═══════════════════════════════════════════
+
   photoInput?.addEventListener('change', e => {
     const file = e.target.files[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) { alert('Photo must be under 5MB.'); return; }
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Photo must be under 5MB.');
+      return;
+    }
     const reader = new FileReader();
     reader.onload = ev => {
       state.photoData = ev.target.result;
-      photoDrop.classList.add('has-photo');
-      photoDrop.querySelector('strong').textContent = 'Photo uploaded ✓';
-      photoDrop.querySelector('small').textContent = file.name;
+      photoDrop?.classList.add('has-photo');
+      const strong = photoDrop?.querySelector('strong');
+      const small = photoDrop?.querySelector('small');
+      if (strong) strong.textContent = 'Photo uploaded ✓';
+      if (small) small.textContent = file.name;
       render();
     };
     reader.readAsDataURL(file);
   });
 
   ['dragenter', 'dragover'].forEach(ev =>
-    photoDrop?.addEventListener(ev, e => { e.preventDefault(); photoDrop.classList.add('dragover'); })
+    photoDrop?.addEventListener(ev, e => {
+      e.preventDefault();
+      photoDrop.classList.add('dragover');
+    })
   );
   ['dragleave', 'drop'].forEach(ev =>
-    photoDrop?.addEventListener(ev, e => { e.preventDefault(); photoDrop.classList.remove('dragover'); })
+    photoDrop?.addEventListener(ev, e => {
+      e.preventDefault();
+      photoDrop.classList.remove('dragover');
+    })
   );
   photoDrop?.addEventListener('drop', e => {
     const file = e.dataTransfer.files[0];
@@ -67,10 +122,21 @@
     }
   });
 
-  // ── LIVE UPDATE ───────────────────────
-  fields.forEach(id => $ (id)?.addEventListener('input', render));
+  // ═══════════════════════════════════════════
+  //   LIVE UPDATE
+  // ═══════════════════════════════════════════
 
-  // ── HELPERS ───────────────────────────
+  FIELDS.forEach(id => {
+    $(id)?.addEventListener('input', () => {
+      render();
+      updateUnlockButton();
+    });
+  });
+
+  // ═══════════════════════════════════════════
+  //   HELPERS
+  // ═══════════════════════════════════════════
+
   const val = (id, fallback = '—') => {
     const el = $(id);
     if (!el) return fallback;
@@ -82,7 +148,10 @@
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
-  // ── RENDER PREVIEW ────────────────────
+  // ═══════════════════════════════════════════
+  //   RENDER PREVIEW
+  // ═══════════════════════════════════════════
+
   function render() {
     const photoHTML = state.photoData
       ? `<img src="${state.photoData}" class="bd-doc-photo" alt="Photo" />`
@@ -146,10 +215,18 @@
     `;
   }
 
-  // ── WATERMARK ─────────────────────────
-  $('previewBtn')?.addEventListener('click', () => watermark.classList.toggle('hidden'));
+  // ═══════════════════════════════════════════
+  //   WATERMARK TOGGLE
+  // ═══════════════════════════════════════════
 
-  // ── FULLSCREEN ────────────────────────
+  $('previewBtn')?.addEventListener('click', () => {
+    watermark?.classList.toggle('hidden');
+  });
+
+  // ═══════════════════════════════════════════
+  //   FULLSCREEN
+  // ═══════════════════════════════════════════
+
   $('fullscreenBtn')?.addEventListener('click', () => {
     const wrap = preview.cloneNode(true);
     const fs = document.createElement('div');
@@ -161,64 +238,63 @@
     fs.addEventListener('click', e => { if (e.target === fs) fs.remove(); });
   });
 
-  // ── RESET ─────────────────────────────
+  // ═══════════════════════════════════════════
+  //   RESET
+  // ═══════════════════════════════════════════
+
   $('resetBtn')?.addEventListener('click', () => {
     if (!confirm('Clear all fields?')) return;
-    fields.forEach(id => { const el = $(id); if (el) el.value = ''; });
+    FIELDS.forEach(id => { const el = $(id); if (el) el.value = ''; });
     state.photoData = null;
-    photoInput.value = '';
-    photoDrop.classList.remove('has-photo');
-    photoDrop.querySelector('strong').textContent = 'Click to upload photo';
-    photoDrop.querySelector('small').textContent = 'JPG, PNG · up to 5MB';
+    if (photoInput) photoInput.value = '';
+    photoDrop?.classList.remove('has-photo');
+    const strong = photoDrop?.querySelector('strong');
+    const small = photoDrop?.querySelector('small');
+    if (strong) strong.textContent = 'Click to upload photo';
+    if (small) small.textContent = 'JPG, PNG · up to 5MB';
     render();
+    updateUnlockButton();
   });
 
   // ═══════════════════════════════════════════
   //   PDF GENERATION — native jsPDF
-  //   A4 = 210 × 297 mm
   // ═══════════════════════════════════════════
+
   async function downloadPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
 
-    // ── Palette per template ──
     const palettes = {
-      classic: { primary: [168, 85, 247],  dark: [17, 17, 17],    muted: [120, 120, 130], bg: [255, 255, 255], accent: [168, 85, 247] },
-      modern:  { primary: [34, 211, 238],  dark: [15, 23, 42],    muted: [100, 116, 139], bg: [255, 255, 255], accent: [8, 145, 178] },
-      royal:   { primary: [212, 175, 55],  dark: [139, 105, 20],  muted: [140, 120, 80],  bg: [255, 253, 245], accent: [212, 175, 55] },
+      classic: { primary: [168, 85, 247], dark: [17, 17, 17], muted: [120, 120, 130], bg: [255, 255, 255], accent: [168, 85, 247] },
+      modern:  { primary: [34, 211, 238], dark: [15, 23, 42], muted: [100, 116, 139], bg: [255, 255, 255], accent: [8, 145, 178] },
+      royal:   { primary: [212, 175, 55], dark: [139, 105, 20], muted: [140, 120, 80], bg: [255, 253, 245], accent: [212, 175, 55] },
     };
     const c = palettes[state.template] || palettes.classic;
 
     const PAGE_W = 210;
     const PAGE_H = 297;
-    const M = 18;                  // margin
+    const M = 18;
     const CONTENT_W = PAGE_W - M * 2;
 
-    // ── Background ──
     doc.setFillColor(...c.bg);
     doc.rect(0, 0, PAGE_W, PAGE_H, 'F');
 
-    // ── Top accent bar ──
     doc.setFillColor(...c.primary);
     doc.rect(0, 0, PAGE_W, 4, 'F');
 
-    // ── Header ──
     let y = M + 4;
 
-    // Name
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(24);
     doc.setTextColor(...c.dark);
     doc.text(val('name', 'Your Name'), M, y);
 
-    // Subtitle
     y += 7;
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
     doc.setTextColor(...c.muted);
     doc.text('MARRIAGE BIODATA', M, y);
 
-    // Photo (top-right)
     if (state.photoData) {
       try {
         const imgW = 30;
@@ -232,7 +308,6 @@
       }
     }
 
-    // Divider
     y += 6;
     doc.setDrawColor(...c.primary);
     doc.setLineWidth(0.6);
@@ -240,11 +315,9 @@
 
     y += 10;
 
-    // ── Section renderer ──
     const lineH = 6;
 
     function section(title, rows) {
-      // Section heading
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(9);
       doc.setTextColor(...c.accent);
@@ -255,7 +328,6 @@
       doc.line(M, y, M + 30, y);
       y += 6;
 
-      // Rows
       rows.forEach(([label, value]) => {
         const isFull = label.length > 0 && value.length > 60;
         if (isFull) {
@@ -271,7 +343,6 @@
           doc.text(wrapped, M + 4, y);
           y += wrapped.length * 5 + 3;
         } else {
-          // Two columns
           doc.setFont('helvetica', 'bold');
           doc.setFontSize(9.5);
           doc.setTextColor(80, 80, 90);
@@ -285,12 +356,10 @@
           y += Math.max(lineH, wrapped.length * 5);
         }
 
-        // Dotted divider
         doc.setDrawColor(230, 230, 230);
         doc.setLineWidth(0.15);
         doc.line(M, y - 1.5, PAGE_W - M, y - 1.5);
 
-        // Check page overflow BEFORE next section
         if (y > PAGE_H - 30) {
           doc.addPage();
           doc.setFillColor(...c.bg);
@@ -304,7 +373,6 @@
       y += 4;
     }
 
-    // ── Personal ──
     section('Personal', [
       ['Date of Birth', val('dob')],
       ['Height', val('height')],
@@ -313,7 +381,6 @@
       ['Marital Status', val('marital', 'Never Married')],
     ]);
 
-    // ── Education & Career ──
     section('Education & Career', [
       ['Education', val('education')],
       ['Institute', val('college')],
@@ -321,7 +388,6 @@
       ['Annual Income', val('income')],
     ]);
 
-    // ── Family ──
     section('Family', [
       ['Father', val('father')],
       ['Father\'s Work', val('fatherJob')],
@@ -330,14 +396,12 @@
       ['Siblings', val('siblings')],
     ]);
 
-    // ── Contact ──
     section('Contact', [
       ['Phone', val('phone')],
       ['Email', val('email')],
       ['Address', val('address')],
     ]);
 
-    // ── Footer ──
     const footerY = PAGE_H - 12;
     doc.setDrawColor(220, 220, 220);
     doc.setLineWidth(0.2);
@@ -349,93 +413,100 @@
     doc.text('Generated by LIFEKit AI', M, footerY);
     doc.text('lifekit.ai', PAGE_W - M, footerY, { align: 'right' });
 
-    // ── Save ──
     const safeName = val('name', 'lifekit').trim().replace(/\s+/g, '-').toLowerCase();
     doc.save(`biodata-${safeName}.pdf`);
   }
 
-    // ── DOWNLOAD BUTTON ───────────────────
+  // ═══════════════════════════════════════════
+  //   DOWNLOAD BUTTON
+  // ═══════════════════════════════════════════
+
   function handleDownload() {
-    // Already paid (this session or in last 30 days)
-    if (state.paid || window.LIFEKitPayment.isPaid('biodata')) {
+    // Block if form not valid AND user hasn't paid
+    if (!state.paid && !(window.LIFEKitPayment && window.LIFEKitPayment.isPaid('biodata'))) {
+      if (!isFormValid()) {
+        alert('Please enter your full name first.');
+        $('name')?.focus();
+        return;
+      }
+    }
+
+    if (state.paid || (window.LIFEKitPayment && window.LIFEKitPayment.isPaid('biodata'))) {
       state.paid = true;
-      setButtonState('paid');
+      updateUnlockButton();
       return downloadPDF();
     }
 
-    // Otherwise open the payment flow
     const customerName = $('name')?.value || '';
+
+    if (!window.LIFEKitPayment) {
+      alert('Payment system not loaded. Please refresh the page.');
+      return;
+    }
 
     window.LIFEKitPayment.openCheckout('biodata', customerName, {
       onSuccess: () => {
         state.paid = true;
-        setButtonState('paid');
+        updateUnlockButton();
         setTimeout(() => downloadPDF(), 600);
       },
       onCancel: () => {
-        setButtonState('default');
+        updateUnlockButton();
       },
     });
-
-    setButtonState('processing');
   }
 
-  // ── BUTTON STATE HELPER ───────────────
-  function setButtonState(stateName) {
-    const btn = $('downloadBtn');
-    const navBtn = $('navDownload');
-    if (!btn) return;
-
-    if (stateName === 'processing') {
-      btn.disabled = true;
-      btn.textContent = 'Opening payment…';
-    } else if (stateName === 'paid') {
-      btn.disabled = false;
-      btn.textContent = '⬇ Download PDF';
-      if (navBtn) navBtn.textContent = 'Download PDF';
-    } else {
-      btn.disabled = false;
-      btn.textContent = '🔓 Unlock HD PDF — ₹99';
-    }
-  }
-
-  // ── AUTO-UNLOCK IF RETURNED FROM PAYMENT ─
-  window.addEventListener('lifekit:paid', (e) => {
-    if (e.detail.product === 'biodata') {
-      state.paid = true;
-      setButtonState('paid');
-      setTimeout(() => downloadPDF(), 800);
-    }
-  });
-
-  // ── CHECK PAID STATE ON PAGE LOAD ─────
-  if (window.LIFEKitPayment?.isPaid('biodata')) {
-    state.paid = true;
-    setButtonState('paid');
-  }
-
-  // ── BUTTON WIRING ─────────────────────
   $('downloadBtn')?.addEventListener('click', handleDownload);
   $('navDownload')?.addEventListener('click', e => {
     e.preventDefault();
     handleDownload();
   });
-  
-  // ── KEYBOARD ──────────────────────────
+
+  // ═══════════════════════════════════════════
+  //   KEYBOARD SHORTCUTS
+  // ═══════════════════════════════════════════
+
   document.addEventListener('keydown', e => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); handleDownload(); }
-    if (e.key === 'Escape') document.querySelector('.preview-fullscreen')?.remove();
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault();
+      handleDownload();
+    }
+    if (e.key === 'Escape') {
+      document.querySelector('.preview-fullscreen')?.remove();
+    }
   });
 
-  // ── PREFILL ───────────────────────────
+  // ═══════════════════════════════════════════
+  //   RETURN FROM PAYMENT
+  // ═══════════════════════════════════════════
+
+  window.addEventListener('lifekit:paid', (e) => {
+    if (e.detail.product === 'biodata') {
+      state.paid = true;
+      updateUnlockButton();
+      setTimeout(() => downloadPDF(), 800);
+    }
+  });
+
+  // ═══════════════════════════════════════════
+  //   PREFILL FROM URL
+  // ═══════════════════════════════════════════
+
   const params = new URLSearchParams(location.search);
-  let prefilled = false;
-  fields.forEach(id => {
+  FIELDS.forEach(id => {
     const v = params.get(id);
-    if (v && $(id)) { $(id).value = v; prefilled = true; }
+    if (v && $(id)) $(id).value = v;
   });
 
-  // ── INIT ──────────────────────────────
+  // ═══════════════════════════════════════════
+  //   INIT
+  // ═══════════════════════════════════════════
+
+  if (window.LIFEKitPayment && window.LIFEKitPayment.isPaid('biodata')) {
+    state.paid = true;
+  }
+
   render();
+  updateUnlockButton();
 
 })();

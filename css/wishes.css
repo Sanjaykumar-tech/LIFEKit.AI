@@ -1,0 +1,635 @@
+/* ═══════════════════════════════════════════
+   LIFEKit AI — Wishes Maker
+   ═══════════════════════════════════════════ */
+
+.wishes-page { background: var(--bg); }
+
+/* ── HEADER ─────────────────────────────── */
+.ws-header {
+  text-align: center;
+  padding: 60px 20px 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+.ws-header .badge { margin-bottom: 18px; }
+.ws-header h1 {
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin-bottom: 14px;
+}
+.ws-header p {
+  color: var(--muted);
+  font-size: 1.05rem;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+/* ── LAYOUT ─────────────────────────────── */
+.ws-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  max-width: 1300px;
+  margin: 40px auto 80px;
+  padding: 0 28px;
+  align-items: start;
+}
+@media (max-width: 1000px) {
+  .ws-layout { grid-template-columns: 1fr; gap: 30px; }
+}
+
+/* ── FORM PANEL ─────────────────────────── */
+.ws-form-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.ws-block {
+  background: linear-gradient(180deg, var(--surface), var(--surface-2));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px 22px;
+  transition: border-color .3s;
+}
+.ws-block:focus-within {
+  border-color: rgba(168, 85, 247, 0.5);
+  box-shadow: 0 0 40px rgba(192, 38, 211, 0.08);
+}
+
+.ws-block-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.ws-step {
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #a855f7, #c026d3);
+  display: grid;
+  place-items: center;
+  font-size: .8rem;
+  font-weight: 800;
+  color: #fff;
+  box-shadow: 0 0 16px rgba(192, 38, 211, 0.5);
+  flex-shrink: 0;
+}
+.ws-block h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+/* ── OCCASION PICKER ────────────────────── */
+.occ-picker {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.occ-card {
+  background: var(--bg);
+  border: 1.5px solid var(--border-2);
+  border-radius: 14px;
+  padding: 18px 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-family: inherit;
+  color: var(--muted);
+  font-size: .85rem;
+  font-weight: 600;
+  transition: all .25s;
+}
+.occ-card:hover {
+  border-color: var(--primary);
+  color: var(--text);
+  transform: translateY(-2px);
+}
+.occ-card.active {
+  border-color: #c026d3;
+  background: linear-gradient(180deg, rgba(192, 38, 211, 0.1), var(--bg));
+  color: var(--text);
+  box-shadow: 0 0 24px rgba(192, 38, 211, 0.3);
+}
+.occ-emoji {
+  font-size: 1.7rem;
+  transition: transform .3s;
+}
+.occ-card:hover .occ-emoji,
+.occ-card.active .occ-emoji {
+  transform: scale(1.15);
+}
+
+/* ── STYLE PICKER ───────────────────────── */
+.style-picker {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+@media (max-width: 500px) {
+  .style-picker { grid-template-columns: repeat(2, 1fr); }
+}
+.style-card {
+  background: var(--bg);
+  border: 1.5px solid var(--border-2);
+  border-radius: 12px;
+  padding: 8px 8px 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-family: inherit;
+  color: var(--muted);
+  font-size: .78rem;
+  font-weight: 600;
+  transition: all .25s;
+}
+.style-card:hover { border-color: var(--primary); color: var(--text); }
+.style-card.active {
+  border-color: #c026d3;
+  color: var(--text);
+  box-shadow: 0 0 20px rgba(192, 38, 211, 0.25);
+}
+
+.style-preview {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 8px;
+}
+.style-preview.gradient {
+  background: linear-gradient(135deg, #c026d3, #a855f7, #22d3ee);
+}
+.style-preview.dark {
+  background: linear-gradient(160deg, #0a0a0f, #1a1530, #2d1b4e);
+  border: 1px solid #332a52;
+}
+.style-preview.elegant {
+  background: linear-gradient(160deg, #fffdf5, #f5e6b3);
+  border: 1px solid #d4af37;
+}
+.style-preview.romantic {
+  background: linear-gradient(135deg, #ff6b9d, #ff8ab5, #ffc2d1);
+}
+
+/* ── FORM FIELDS ────────────────────────── */
+.ws-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.ws-span-2 { grid-column: span 2; }
+@media (max-width: 600px) {
+  .ws-grid { grid-template-columns: 1fr; }
+  .ws-span-2 { grid-column: span 1; }
+}
+
+.ws-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ws-grid label > span {
+  font-size: .78rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+.ws-grid input,
+.ws-grid textarea {
+  background: var(--bg);
+  border: 1px solid var(--border-2);
+  border-radius: 10px;
+  padding: 11px 13px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: .92rem;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+  width: 100%;
+}
+.ws-grid input:focus,
+.ws-grid textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.15);
+}
+.ws-grid input::placeholder,
+.ws-grid textarea::placeholder { color: #55556a; }
+.ws-grid textarea { resize: vertical; min-height: 80px; }
+
+/* ── QUICK TEMPLATES ────────────────────── */
+.quick-templates {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.quick-tpl {
+  background: var(--bg);
+  border: 1px solid var(--border-2);
+  border-radius: 12px;
+  padding: 12px 14px;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: .85rem;
+  text-align: left;
+  cursor: pointer;
+  transition: all .2s;
+  line-height: 1.4;
+}
+.quick-tpl:hover {
+  border-color: var(--primary);
+  color: var(--text);
+  background: var(--surface);
+}
+.quick-tpl strong {
+  display: block;
+  color: var(--primary-3);
+  margin-bottom: 3px;
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+/* ── PREVIEW PANEL ──────────────────────── */
+.ws-preview-panel { min-width: 0; }
+
+.ws-preview-sticky {
+  position: sticky;
+  top: 90px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ws-preview-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.ws-preview-head h3 {
+  font-size: 1rem;
+  font-weight: 700;
+}
+.ws-preview-actions { display: flex; gap: 6px; }
+.ws-icon-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: .9rem;
+  display: grid;
+  place-items: center;
+  transition: all .2s;
+  font-family: inherit;
+}
+.ws-icon-btn:hover {
+  color: var(--text);
+  border-color: var(--primary);
+}
+
+/* ── PREVIEW WRAP ───────────────────────── */
+.ws-preview-wrap {
+  position: relative;
+  background: #1a1a24;
+  border-radius: 16px;
+  padding: 24px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  min-height: 500px;
+}
+
+/* ── THE CARD ───────────────────────────── */
+.wish-card {
+  width: 100%;
+  max-width: 440px;
+  aspect-ratio: 4 / 5;
+  border-radius: 20px;
+  padding: 40px 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+  transition: transform .3s;
+}
+
+.wish-card .wc-occasion {
+  font-size: 2.6rem;
+  margin-bottom: 14px;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+  animation: bounce 2s ease-in-out infinite;
+}
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.wish-card .wc-to {
+  font-family: 'Great Vibes', cursive;
+  font-size: 2rem;
+  line-height: 1;
+  margin-bottom: 6px;
+  opacity: .85;
+}
+
+.wish-card .wc-headline {
+  font-family: 'Playfair Display', serif;
+  font-weight: 800;
+  font-size: 2.2rem;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin-bottom: 18px;
+}
+
+.wish-card .wc-message {
+  font-family: 'Inter', sans-serif;
+  font-size: .95rem;
+  line-height: 1.6;
+  max-width: 320px;
+  margin-bottom: 22px;
+  opacity: .92;
+  white-space: pre-wrap;
+}
+
+.wish-card .wc-extra {
+  font-family: 'Dancing Script', cursive;
+  font-size: 1.4rem;
+  margin-bottom: 20px;
+  opacity: .9;
+}
+
+.wish-card .wc-from {
+  font-family: 'Great Vibes', cursive;
+  font-size: 1.5rem;
+  margin-top: 8px;
+  opacity: .85;
+}
+.wish-card .wc-from::before {
+  content: '— ';
+  opacity: .6;
+}
+
+.wish-card .wc-divider {
+  width: 60px;
+  height: 1.5px;
+  background: currentColor;
+  opacity: .3;
+  margin: 12px 0;
+}
+
+.wish-card .wc-brand {
+  position: absolute;
+  bottom: 14px;
+  right: 18px;
+  font-family: 'Inter', sans-serif;
+  font-size: .65rem;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  opacity: .4;
+}
+
+/* ══ STYLE VARIANTS ══ */
+.wish-card.gradient {
+  background: linear-gradient(135deg, #c026d3 0%, #a855f7 50%, #22d3ee 100%);
+  color: #fff;
+  background-size: 200% 200%;
+  animation: gradientShift 8s ease infinite;
+}
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+.wish-card.gradient::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 15% 15%, rgba(255,255,255,0.15), transparent 40%),
+    radial-gradient(circle at 85% 85%, rgba(255,255,255,0.1), transparent 40%);
+  pointer-events: none;
+}
+
+.wish-card.dark {
+  background: linear-gradient(160deg, #0a0a0f 0%, #1a1530 50%, #2d1b4e 100%);
+  color: #e9d5ff;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+}
+.wish-card.dark::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(192, 38, 211, 0.35), transparent 45%),
+    radial-gradient(circle at 80% 80%, rgba(34, 211, 238, 0.25), transparent 45%);
+  pointer-events: none;
+}
+.wish-card.dark .wc-headline { color: #fff; }
+.wish-card.dark .wc-brand { color: #a855f7; }
+
+.wish-card.elegant {
+  background: linear-gradient(160deg, #fffdf5 0%, #faf1d0 100%);
+  color: #4a3b10;
+  border: 2px solid #d4af37;
+  position: relative;
+}
+.wish-card.elegant::before {
+  content: '';
+  position: absolute;
+  inset: 10px;
+  border: 1px solid #d4af37;
+  border-radius: 14px;
+  opacity: .45;
+  pointer-events: none;
+}
+.wish-card.elegant .wc-headline {
+  color: #8b6914;
+  font-family: 'Playfair Display', serif;
+}
+.wish-card.elegant .wc-to,
+.wish-card.elegant .wc-from {
+  color: #8b6914;
+}
+.wish-card.elegant .wc-brand { color: #8b6914; }
+
+.wish-card.romantic {
+  background: linear-gradient(135deg, #ff6b9d 0%, #ff8ab5 50%, #ffc2d1 100%);
+  color: #fff;
+  background-size: 200% 200%;
+  animation: gradientShift 10s ease infinite;
+}
+.wish-card.romantic::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2), transparent 45%),
+    radial-gradient(circle at 70% 70%, rgba(255,255,255,0.15), transparent 45%);
+  pointer-events: none;
+}
+.wish-card.romantic .wc-headline { color: #fff; }
+
+/* ── WATERMARK ──────────────────────────── */
+.watermark {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  z-index: 10;
+  transition: opacity .35s;
+}
+.watermark span {
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(1.1rem, 2.5vw, 1.6rem);
+  font-weight: 900;
+  letter-spacing: .08em;
+  color: rgba(255, 255, 255, 0.35);
+  transform: rotate(-28deg);
+  white-space: nowrap;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.4);
+  padding: 12px 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  user-select: none;
+}
+.watermark.hidden { opacity: 0; }
+
+/* ── PREVIEW FOOT / PRICING ─────────────── */
+.ws-preview-foot {
+  background: linear-gradient(180deg, var(--surface), var(--surface-2));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ws-price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.ws-price-label {
+  font-size: .72rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  font-weight: 600;
+}
+.ws-price-value {
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, #c026d3, #a855f7, #22d3ee);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  line-height: 1;
+  margin-top: 4px;
+}
+.ws-price-badge {
+  font-size: .72rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(34, 197, 94, 0.12);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.ws-download-btn {
+  width: 100%;
+  padding: 14px 20px;
+  font-size: .95rem;
+  font-weight: 700;
+  border-radius: 12px;
+}
+.ws-secondary-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.ws-small-btn {
+  padding: 10px 12px;
+  font-size: .82rem;
+  border-radius: 11px;
+  width: 100%;
+}
+.ws-trust {
+  display: flex;
+  justify-content: space-around;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  margin-top: 4px;
+}
+.ws-trust-item {
+  font-size: .74rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+/* ── FULLSCREEN ─────────────────────────── */
+.preview-fullscreen {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 6, 15, 0.95);
+  backdrop-filter: blur(20px);
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 40px 20px;
+  animation: fadeIn .3s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.preview-fullscreen .ws-preview-wrap {
+  max-height: 90vh;
+  max-width: 560px;
+  width: 100%;
+}
+.preview-fullscreen .wish-card {
+  max-height: 85vh;
+}
+.preview-fullscreen .close-btn {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  color: var(--text);
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+/* ── RESPONSIVE ─────────────────────────── */
+@media (max-width: 1000px) {
+  .ws-preview-sticky { position: static; }
+}
+@media (max-width: 600px) {
+  .ws-header { padding: 40px 20px 10px; }
+  .ws-layout { padding: 0 16px; margin: 24px auto 60px; }
+  .ws-block { padding: 20px 18px; }
+  .wish-card { padding: 32px 24px; }
+  .wish-card .wc-headline { font-size: 1.7rem; }
+  .wish-card .wc-to { font-size: 1.5rem; }
+  .wish-card .wc-message { font-size: .85rem; }
+}

@@ -1,0 +1,400 @@
+/* ═══════════════════════════════════════════
+   LIFEKit AI — Tools Page
+   ═══════════════════════════════════════════ */
+
+/* ── PAGE HEADER ─────────────────────────── */
+.tools-hero {
+  text-align: center;
+  padding: 80px 20px 30px;
+  max-width: 800px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.tools-hero .badge { margin-bottom: 22px; }
+
+.tools-hero h1 {
+  font-size: clamp(2.2rem, 6vw, 3.8rem);
+  line-height: 1.08;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 18px;
+}
+
+.tools-hero p {
+  color: var(--muted);
+  font-size: 1.1rem;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+/* ── FILTER BAR ──────────────────────────── */
+.tools-filter {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 40px auto 0;
+  max-width: 700px;
+  padding: 0 20px;
+}
+
+.filter-pill {
+  background: var(--surface);
+  color: var(--muted);
+  border: 1px solid var(--border-2);
+  padding: 9px 18px;
+  border-radius: 999px;
+  font-size: .85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .25s ease;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.filter-pill:hover {
+  color: var(--text);
+  border-color: var(--primary);
+  background: var(--surface-2);
+}
+
+.filter-pill.active {
+  background: linear-gradient(135deg, #a855f7, #c026d3);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 6px 24px rgba(192, 38, 211, 0.4);
+}
+
+.filter-pill .count {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: .72rem;
+  font-weight: 700;
+}
+.filter-pill:not(.active) .count {
+  background: rgba(168, 85, 247, 0.15);
+  color: var(--primary-3);
+}
+
+/* ── TOOLS GRID ──────────────────────────── */
+.tools-section {
+  padding: 60px 32px 90px;
+  max-width: 1150px;
+  margin: 0 auto;
+}
+
+.tools-grid {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+/* ── TOOL CARD (larger than home cards) ─── */
+.tool-card {
+  position: relative;
+  background: linear-gradient(180deg, var(--surface), var(--surface-2));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px 28px;
+  transition: transform .35s cubic-bezier(.2,.8,.2,1), border-color .3s, box-shadow .35s;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+}
+
+.tool-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #c026d3, #a855f7, #22d3ee, transparent);
+  opacity: 0;
+  transition: opacity .4s;
+}
+
+.tool-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-lg);
+  background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%),
+              rgba(192, 38, 211, 0.12),
+              transparent 50%);
+  opacity: 0;
+  transition: opacity .4s;
+  pointer-events: none;
+}
+
+.tool-card:hover {
+  transform: translateY(-8px);
+  border-color: var(--primary);
+  box-shadow:
+    0 24px 60px rgba(192, 38, 211, 0.28),
+    0 0 0 1px rgba(168, 85, 247, 0.12) inset;
+}
+.tool-card:hover::before { opacity: 1; }
+.tool-card:hover::after  { opacity: 1; }
+
+/* ── CARD HEAD ───────────────────────────── */
+.tool-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.tool-card .card-icon {
+  width: 62px;
+  height: 62px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  font-size: 1.8rem;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.18), rgba(34, 211, 238, 0.12));
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  transition: transform .35s cubic-bezier(.2,.8,.2,1);
+  flex-shrink: 0;
+}
+.tool-card:hover .card-icon {
+  transform: scale(1.1) rotate(-4deg);
+}
+
+/* ── TAG / BADGE ─────────────────────────── */
+.tool-tag {
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  padding: 5px 11px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.tool-tag.new {
+  background: linear-gradient(135deg, #22d3ee, #38bdf8);
+  color: #001018;
+  box-shadow: 0 0 20px rgba(34, 211, 238, 0.5);
+}
+
+.tool-tag.hot {
+  background: linear-gradient(135deg, #f5c451, #fbbf24);
+  color: #1a1000;
+  box-shadow: 0 0 20px rgba(245, 196, 81, 0.5);
+}
+
+.tool-tag.free {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+/* ── CARD BODY ───────────────────────────── */
+.tool-card h3 {
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 10px;
+}
+
+.tool-card .desc {
+  color: var(--muted);
+  font-size: .94rem;
+  line-height: 1.6;
+  margin-bottom: 22px;
+  flex-grow: 1;
+}
+
+/* ── FEATURE CHIPS ───────────────────────── */
+.tool-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 22px;
+}
+
+.chip {
+  font-size: .72rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: rgba(168, 85, 247, 0.06);
+  border: 1px solid var(--border-2);
+  padding: 4px 10px;
+  border-radius: 999px;
+  transition: all .2s;
+}
+.tool-card:hover .chip {
+  border-color: rgba(168, 85, 247, 0.35);
+  color: var(--primary-3);
+}
+
+/* ── CARD FOOTER ─────────────────────────── */
+.tool-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  gap: 12px;
+}
+
+.tool-card .price {
+  font-size: 1.45rem;
+  font-weight: 900;
+  color: var(--primary-3);
+  letter-spacing: -0.03em;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+.tool-card .price small {
+  font-size: .7rem;
+  color: var(--muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.tool-open-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #a855f7, #c026d3);
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: .85rem;
+  border: none;
+  transition: all .25s;
+  box-shadow: 0 4px 18px rgba(192, 38, 211, 0.3);
+}
+.tool-card:hover .tool-open-btn {
+  box-shadow: 0 8px 28px rgba(192, 38, 211, 0.55);
+  transform: translateX(2px);
+}
+.tool-open-btn span.arrow {
+  transition: transform .25s;
+}
+.tool-card:hover .tool-open-btn span.arrow {
+  transform: translateX(4px);
+}
+
+/* ── FEATURED TOOL (larger, spans 2 cols) ─ */
+.tool-card.featured {
+  grid-column: span 2;
+  border-color: rgba(245, 196, 81, 0.4);
+  background:
+    radial-gradient(circle at 90% 10%, rgba(245, 196, 81, 0.08), transparent 50%),
+    linear-gradient(180deg, rgba(192, 38, 211, 0.08), var(--surface-2));
+}
+.tool-card.featured .card-icon {
+  background: linear-gradient(135deg, rgba(245, 196, 81, 0.2), rgba(251, 191, 36, 0.1));
+  border-color: rgba(245, 196, 81, 0.35);
+  width: 72px;
+  height: 72px;
+  font-size: 2.1rem;
+}
+.tool-card.featured h3 {
+  font-size: 1.6rem;
+}
+.tool-card.featured .price {
+  color: var(--gold);
+}
+.tool-card.featured:hover {
+  border-color: var(--gold);
+  box-shadow:
+    0 24px 60px rgba(245, 196, 81, 0.25),
+    0 0 0 1px rgba(245, 196, 81, 0.15) inset;
+}
+.tool-card.featured::before {
+  background: linear-gradient(90deg, transparent, #f5c451, #fbbf24, transparent);
+}
+
+/* ── COMING SOON CARD ────────────────────── */
+.tool-card.coming-soon {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(0.4);
+}
+.tool-card.coming-soon:hover {
+  transform: none;
+  border-color: var(--border);
+  box-shadow: none;
+}
+.tool-card.coming-soon .tool-open-btn {
+  background: var(--surface-2);
+  color: var(--muted);
+  box-shadow: none;
+  pointer-events: none;
+}
+
+/* ── EMPTY STATE ─────────────────────────── */
+.tools-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--muted);
+}
+.tools-empty h3 {
+  font-size: 1.3rem;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+/* ── CTA STRIP (bottom of tools page) ────── */
+.tools-cta {
+  max-width: 1000px;
+  margin: 40px auto 90px;
+  padding: 50px 40px;
+  border-radius: var(--radius-lg);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 20% 50%, rgba(192, 38, 211, 0.22), transparent 60%),
+    radial-gradient(circle at 80% 50%, rgba(34, 211, 238, 0.18), transparent 60%),
+    var(--surface);
+  border: 1px solid var(--border-2);
+}
+.tools-cta::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #c026d3, #a855f7, #22d3ee, transparent);
+}
+.tools-cta h2 {
+  font-size: clamp(1.5rem, 3.5vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 10px;
+}
+.tools-cta p {
+  color: var(--muted);
+  max-width: 500px;
+  margin: 0 auto 26px;
+}
+
+/* ── RESPONSIVE ──────────────────────────── */
+@media (max-width: 900px) {
+  .tool-card.featured {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 700px) {
+  .tools-hero { padding: 60px 20px 20px; }
+  .tools-section { padding: 40px 20px 60px; }
+  .tools-grid { grid-template-columns: 1fr; gap: 18px; }
+  .tool-card { padding: 26px 22px; }
+  .tool-card.featured { padding: 28px 24px; }
+  .tool-card.featured h3 { font-size: 1.35rem; }
+  .tools-cta { margin: 30px 20px 60px; padding: 40px 24px; }
+  .filter-pill { font-size: .8rem; padding: 8px 14px; }
+}

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Free marriage biodata maker with live PDF preview. Just fill the form — download a beautiful biodata in seconds." />
+  <title>Biodata Maker — LIFEKit AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700;800&family=Great+Vibes&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/biodata.css" />
+</head>
+<body class="biodata-page">
+
+  <!-- ── PREMIUM CURSOR ─────────────────── -->
+<div class="cursor-arrow" id="cursorArrow">
+  <svg viewBox="0 0 24 28" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="cursorGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#e9d5ff"/>
+        <stop offset="35%" stop-color="#c026d3"/>
+        <stop offset="70%" stop-color="#a855f7"/>
+        <stop offset="100%" stop-color="#22d3ee"/>
+      </linearGradient>
+      <linearGradient id="cursorEdge" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
+        <stop offset="100%" stop-color="#ffffff" stop-opacity="0.4"/>
+      </linearGradient>
+    </defs>
+    <path d="M3 2 L3 22 L8.5 17 L12 24 L15 22.5 L11.5 15.5 L19 15 Z"
+          fill="url(#cursorGrad)"
+          stroke="url(#cursorEdge)"
+          stroke-width="1.2"
+          stroke-linejoin="round"
+          stroke-linecap="round"/>
+    <circle cx="4.5" cy="4.5" r="1.2" fill="#ffffff" opacity="0.95"/>
+  </svg>
+</div>
+
+  <!-- ── NAVBAR ──────────────────────────── -->
+  <nav class="nav">
+    <a href="../index.html" class="brand">
+      <span class="brand-mark">
+        <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="brandGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#c026d3"/>
+              <stop offset="50%" stop-color="#a855f7"/>
+              <stop offset="100%" stop-color="#22d3ee"/>
+            </linearGradient>
+          </defs>
+          <path d="M10 6 Q10 4 12 4 L18 4 Q20 4 20 6 L20 26 L30 26 Q32 26 32 28 L32 32 Q32 34 30 34 L12 34 Q10 34 10 32 Z"
+                fill="url(#brandGrad)" opacity="0.95"/>
+          <path d="M30 8 L32 12 L36 14 L32 16 L30 20 L28 16 L24 14 L28 12 Z"
+                fill="#e9d5ff" opacity="0.9"/>
+          <circle cx="24" cy="18" r="2" fill="#22d3ee"/>
+        </svg>
+      </span>
+      LIFEKit <span class="ai">AI</span>
+    </a>
+    <div class="nav-links">
+      <a href="../tools.html">← All Tools</a>
+      <a href="#" class="btn-primary" id="navDownload">Download ₹99</a>
+    </div>
+  </nav>
+
+  <!-- ── HEADER ──────────────────────────── -->
+  <header class="bd-header">
+    <span class="badge"><span class="badge-dot"></span> Live preview as you type</span>
+    <h1>Marriage <span class="grad">Biodata Maker</span></h1>
+    <p>Fill the form → watch the preview update → download a print-ready PDF.</p>
+  </header>
+
+  <!-- ── MAIN LAYOUT ─────────────────────── -->
+  <main class="bd-layout">
+
+    <!-- ── FORM PANEL ───────────────────── -->
+    <section class="bd-form-panel">
+
+      <!-- STEP 1: TEMPLATE -->
+      <div class="bd-block">
+        <div class="bd-block-head">
+          <span class="bd-step">1</span>
+          <h3>Choose Template</h3>
+        </div>
+        <div class="template-picker">
+          <button class="template-card active" data-template="classic">
+            <div class="template-thumb classic">
+              <div class="thumb-line" style="width:70%"></div>
+              <div class="thumb-line" style="width:50%"></div>
+              <div class="thumb-line" style="width:60%"></div>
+            </div>
+            <span>Classic</span>
+          </button>
+          <button class="template-card" data-template="modern">
+            <div class="template-thumb modern">
+              <div class="thumb-line" style="width:80%"></div>
+              <div class="thumb-line" style="width:40%"></div>
+              <div class="thumb-line" style="width:60%"></div>
+            </div>
+            <span>Modern</span>
+          </button>
+          <button class="template-card" data-template="royal">
+            <div class="template-thumb royal">
+              <div class="thumb-line" style="width:60%"></div>
+              <div class="thumb-line" style="width:70%"></div>
+              <div class="thumb-line" style="width:50%"></div>
+            </div>
+            <span>Royal</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 2: PHOTO -->
+      <div class="bd-block">
+        <div class="bd-block-head">
+          <span class="bd-step">2</span>
+          <h3>Your Photo</h3>
+        </div>
+        <label class="photo-drop" id="photoDrop">
+          <input type="file" id="photoInput" accept="image/*" hidden />
+          <div class="photo-drop-inner" id="photoDropInner">
+            <div class="photo-icon">📸</div>
+            <div>
+              <strong>Click to upload photo</strong>
+              <small>JPG, PNG · up to 5MB</small>
+            </div>
+          </div>
+        </label>
+      </div>
+
+      <!-- STEP 3: PERSONAL -->
+      <div class="bd-block">
+        <div class="bd-block-head">
+          <span class="bd-step">3</span>
+          <h3>Personal Details</h3>
+        </div>
+
+        <div class="bd-grid">
+          <label>
+            <span>Full Name *</span>
+            <input type="text" id="name" placeholder="e.g. Priya Sharma" autocomplete="name" />
+          </label>
+          <label>
+            <span>Date of Birth</span>
+            <input type="date" id="dob" />
+          </label>
+          <label>
+            <span>Height</span>
+            <input type="text" id="height" placeholder="e.g. 5'4&quot;" />
+          </label>
+          <label>
+            <span>Religion / Caste</span>
+            <input type="text" id="religion" placeholder="e.g. Hindu / Brahmin" />
+          </label>
+          <label>
+            <span>Mother Tongue</span>
+            <input type="text" id="language" placeholder="e.g. Hindi, Marathi" />
+          </label>
+          <label>
+            <span>Marital Status</span>
+            <select id="marital">
+              <option value="Never Married">Never Married</option>
+              <option value="Divorced">Divorced</option>
+              <option value="Widowed">Widowed</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <!-- STEP 4: EDUCATION & CAREER -->
+      <div class="bd-block">
+        <div class="bd-block-head">
+          <span class="bd-step">4</span>
+          <h3>Education & Career</h3>
+        </div>
+
+        <div class="bd-grid">
+          <label>
+            <span>Highest Education</span>
+            <input type="text" id="education" placeholder="e.g. B.Tech in CSE" />
+          </label>
+          <label>
+            <span>College / University</span>
+            <input type="text" id="college" placeholder="e.g. IIT Delhi" />
+          </label>
+          <label>
+            <span>Occupation</span>
+            <input type="text" id="job" placeholder="e.g. Software Engineer" />
+          </label>
+          <label>
+            <span>Annual Income</span>
+            <input type="text" id="income" placeholder="e.g. ₹12 LPA" />
+          </label>
+        </div>
+      </div>
+
+      <!-- STEP 5: FAMILY -->
+      <div class="bd-block">
+        <div class="bd-block-head">
+          <span class="bd-step">5</span>
+          <h3>Family Details</h3>
+        </div>
+
+        <div class="bd-grid">
+          <label>
+            <span>Father's Name</span>
+            <input type="text" id="father" placeholder="e.g. Mr. Ramesh Sharma" />
+          </label>
+          <label>
+            <span>Father's Occupation</span>
+            <input type="text" id="fatherJob" placeholder="e.g. Businessman" />
+          </label>
+          <label>
+            <span>Mother's Name</span>
+            <input type="text" id="mother" placeholder="e.g. Mrs. Sunita Sharma" />
+          </label>
+          <label>
+            <span>Mother's Occupation</span>
+            <input type="text" id="motherJob" placeholder="e.g. Homemaker" />
+          </label>
+          <label class="bd-span-2">
+            <span>Siblings</span>
+            <textarea id="siblings" rows="2" placeholder="e.g. 1 elder brother (married), 1 younger sister"></textarea>
+          </label>
+        </div>
+      </div>
+
+      <!-- STEP 6: CONTACT -->
+      <div class="bd-block">
+        <div class="bd-block-head">
+          <span class="bd-step">6</span>
+          <h3>Contact</h3>
+        </div>
+
+        <div class="bd-grid">
+          <label>
+            <span>Phone</span>
+            <input type="tel" id="phone" placeholder="+91 98765 43210" />
+          </label>
+          <label>
+            <span>Email</span>
+            <input type="email" id="email" placeholder="priya@example.com" />
+          </label>
+          <label class="bd-span-2">
+            <span>Address</span>
+            <textarea id="address" rows="2" placeholder="City, State"></textarea>
+          </label>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ── PREVIEW PANEL ────────────────── -->
+    <aside class="bd-preview-panel">
+      <div class="bd-preview-sticky">
+
+        <div class="bd-preview-head">
+          <h3>Live Preview</h3>
+          <div class="bd-preview-actions">
+            <button class="bd-icon-btn" id="fullscreenBtn" title="Fullscreen">⛶</button>
+            <button class="bd-icon-btn" id="resetBtn" title="Reset">↻</button>
+          </div>
+        </div>
+
+        <div class="bd-preview-wrap" id="previewWrap">
+          <div class="biodata-doc classic" id="preview">
+            <!-- Filled by JS -->
+          </div>
+          <div class="watermark" id="watermark">
+            <span>LIFEKit AI · FREE PREVIEW</span>
+          </div>
+        </div>
+
+        <div class="bd-preview-foot">
+          <div class="bd-price-row">
+            <div>
+              <div class="bd-price-label">One-time payment</div>
+              <div class="bd-price-value">₹99</div>
+            </div>
+            <div class="bd-price-badge">No subscription</div>
+          </div>
+
+          <button class="btn-primary bd-download-btn" id="downloadBtn">
+            🔓 Unlock HD PDF — ₹99
+          </button>
+          <button class="btn-ghost bd-preview-btn" id="previewBtn">
+            Preview with watermark
+          </button>
+
+          <div class="bd-trust">
+            <div class="bd-trust-item">✓ Instant download</div>
+            <div class="bd-trust-item">✓ No signup</div>
+            <div class="bd-trust-item">✓ A4 print-ready</div>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- ── FOOTER ──────────────────────────── -->
+  <footer class="footer">
+    <div class="footer-bottom" style="border:none;padding:0;">
+      <span>© 2025 LIFEKit AI</span>
+      <span>Made with 💜 in India</span>
+    </div>
+  </footer>
+
+  <!-- ── LIBRARIES ───────────────────────── -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <!-- ── APP SCRIPTS (ORDER MATTERS!) ────── -->
+  <script src="../js/cursor.js" defer></script>
+  <script src="../js/payment.js"></script>
+  <script src="../js/biodata.js"></script>
+
+</body>
+</html>

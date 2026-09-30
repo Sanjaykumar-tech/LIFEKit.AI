@@ -284,3 +284,6 @@ html {
   .footer-grid { grid-template-columns: 1fr 1fr; gap: 30px; }
   .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
 }
+
+/* Fix scroll offset for sticky navbar */
+#pricing, section[id], div[id] { scroll-margin-top: 100px; }

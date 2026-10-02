@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════
-   LIFEKit AI — Payment Module (Final v4)
-   Razorpay + Cloudflare Worker verification
+   LIFEKit AI — Payment Module (Animated v5)
+   Razorpay + Cloudflare Worker + Premium UI
    ═══════════════════════════════════════════ */
 
 (function () {
@@ -18,11 +18,7 @@
 
   const WORKER_URL = 'https://lifekit-worker.lifekitai.workers.dev';
 
-  const PRICES = {
-    biodata: 99,
-    resume:  49,
-    wishes:  19,
-  };
+  const PRICES = { biodata: 99, resume: 49, wishes: 19 };
 
   const TITLES = {
     biodata: 'Marriage Biodata PDF',
@@ -30,32 +26,29 @@
     wishes:  'Wish Card PNG',
   };
 
+  const ICONS = { biodata: '💍', resume: '💼', wishes: '❤️' };
+
   // ═══════════════════════════════════════════
   //   MAIN ENTRY
   // ═══════════════════════════════════════════
 
   function openCheckout(product, name, callbacks = {}) {
     const { onSuccess = () => {}, onCancel = () => {} } = callbacks;
-
     const link = PAYMENT_LINKS[product];
-    if (!link) {
-      alert('Payment link not configured.');
-      onCancel({ reason: 'unknown_product' });
-      return;
-    }
-
-    const price = PRICES[product] || 0;
+    if (!link) { onCancel({ reason: 'unknown_product' }); return; }
 
     showPayModal({
+      product,
+      price: PRICES[product],
       title: TITLES[product],
-      price,
+      icon: ICONS[product],
       onConfirm: () => {
         const win = window.open(link, '_blank', 'noopener,noreferrer');
         if (!win || win.closed || typeof win.closed === 'undefined') {
           location.href = link;
           return;
         }
-        waitForReturn(product, price, onSuccess, onCancel);
+        waitForReturn(product, onSuccess, onCancel);
       },
       onCancel,
     });
@@ -65,157 +58,251 @@
   //   MODAL — REDIRECT
   // ═══════════════════════════════════════════
 
-  function showPayModal({ title, price, onConfirm, onCancel }) {
-    const modal = document.createElement('div');
-    modal.className = 'lk-pay-modal';
-    modal.innerHTML = `
-      <div class="lk-pay-backdrop"></div>
-      <div class="lk-pay-dialog">
-        <div class="lk-pay-icon">💳</div>
-        <h3>Redirecting to Razorpay</h3>
-        <p class="lk-pay-product">${title}</p>
-        <div class="lk-pay-amount">₹${price}</div>
-        <p class="lk-pay-note">You'll be taken to a secure Razorpay page. After payment, you'll return here automatically.</p>
-        <div class="lk-pay-actions">
-          <button class="lk-pay-cancel">Cancel</button>
-          <button class="lk-pay-go">Continue →</button>
-        </div>
+  function showPayModal({ product, price, title, icon, onConfirm, onCancel }) {
+    const modal = createModal(`
+      <div class="lkp-icon-badge lkp-gradient-${product}">${icon}</div>
+      <h3 class="lkp-title">Ready to unlock?</h3>
+      <p class="lkp-subtitle">${title}</p>
+      <div class="lkp-price">
+        <span class="lkp-price-currency">₹</span>
+        <span class="lkp-price-value">${price}</span>
       </div>
-    `;
-    document.body.appendChild(modal);
-    injectModalStyles();
+      <p class="lkp-note">
+        You'll be taken to Razorpay — a secure payment page.<br>
+        After paying, come back here to download.
+      </p>
+      <div class="lkp-actions">
+        <button class="lkp-btn lkp-btn-ghost" data-action="cancel">Cancel</button>
+        <button class="lkp-btn lkp-btn-primary" data-action="confirm">
+          Pay ₹${price} →
+        </button>
+      </div>
+      <div class="lkp-secure">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+          <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" fill="currentColor" opacity="0.6"/>
+        </svg>
+        Secured by Razorpay
+      </div>
+    `);
 
-    const close = () => modal.remove();
-    modal.querySelector('.lk-pay-backdrop').onclick = () => { close(); onCancel?.(); };
-    modal.querySelector('.lk-pay-cancel').onclick = () => { close(); onCancel?.(); };
-    modal.querySelector('.lk-pay-go').onclick = () => { close(); onConfirm?.(); };
+    modal.querySelector('[data-action="cancel"]').onclick = () => { modal.remove(); onCancel?.(); };
+    modal.querySelector('[data-action="confirm"]').onclick = () => { modal.remove(); onConfirm?.(); };
 
-    setTimeout(() => modal.querySelector('.lk-pay-go')?.focus(), 50);
-
-    const esc = (e) => {
-      if (e.key === 'Escape') { close(); onCancel?.(); document.removeEventListener('keydown', esc); }
-    };
-    document.addEventListener('keydown', esc);
+    injectStyles();
   }
 
   // ═══════════════════════════════════════════
-  //   WAIT FOR RETURN
+  //   WAIT FOR RETURN + AUTO-CHECK
   // ═══════════════════════════════════════════
 
-  function waitForReturn(product, price, onSuccess, onCancel) {
+  function waitForReturn(product, onSuccess, onCancel) {
+    let alreadyChecked = false;
+
     const onVisible = () => {
-      if (document.visibilityState === 'visible') {
+      if (document.visibilityState === 'visible' && !alreadyChecked) {
+        alreadyChecked = true;
         document.removeEventListener('visibilitychange', onVisible);
         setTimeout(() => {
           if (!isPaid(product)) {
-            showConfirmModal(product, price, onSuccess, onCancel);
+            showVerifyModal(product, onSuccess, onCancel);
           }
-        }, 1500);
+        }, 1000);
       }
     };
+
     document.addEventListener('visibilitychange', onVisible);
 
+    // Fallback after 3 min
     setTimeout(() => {
       document.removeEventListener('visibilitychange', onVisible);
       if (!isPaid(product)) {
-        showConfirmModal(product, price, onSuccess, onCancel);
+        showVerifyModal(product, onSuccess, onCancel);
       }
     }, 180000);
   }
 
   // ═══════════════════════════════════════════
-  //   MODAL — CONFIRM (with worker verification)
+  //   MODAL — VERIFY PAYMENT (ANIMATED)
   // ═══════════════════════════════════════════
 
-  function showConfirmModal(product, price, onSuccess, onCancel) {
-    const modal = document.createElement('div');
-    modal.className = 'lk-pay-modal';
-    modal.innerHTML = `
-      <div class="lk-pay-backdrop"></div>
-      <div class="lk-pay-dialog">
-        <div class="lk-pay-icon">✅</div>
-        <h3>Did you complete the payment?</h3>
-        <p class="lk-pay-product">₹${price} · ${product}</p>
-        <p class="lk-pay-note">Enter your email or phone used for payment. We'll verify with our server.</p>
-        <div class="lk-pay-actions lk-pay-actions-3">
-          <button class="lk-pay-not-yet">Not yet</button>
-          <button class="lk-pay-trouble">I had trouble</button>
-          <button class="lk-pay-success">Verify & Unlock ✓</button>
-        </div>
-        <p class="lk-pay-fineprint">We check our secure server for your purchase.</p>
+  function showVerifyModal(product, onSuccess, onCancel) {
+    const modal = createModal(`
+      <div class="lkp-success-icon" id="lkpIcon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="12" cy="12" r="10" opacity="0.3"/>
+          <path d="M8 12l3 3 6-6" class="lkp-check-path"/>
+        </svg>
       </div>
-    `;
-    document.body.appendChild(modal);
+
+      <h3 class="lkp-title" id="lkpTitle">Verify your payment</h3>
+      <p class="lkp-subtitle" id="lkpSubtitle">
+        Enter the email or phone you used during payment.
+      </p>
+
+      <div class="lkp-input-wrap" id="lkpInputWrap">
+        <input
+          type="text"
+          class="lkp-input"
+          id="lkpInput"
+          placeholder="email@example.com or +919..."
+          autocomplete="email"
+          autofocus
+        />
+        <div class="lkp-input-hint">We'll check our server for your purchase</div>
+      </div>
+
+      <div class="lkp-verifying" id="lkpVerifying" style="display:none;">
+        <div class="lkp-spinner"></div>
+        <div class="lkp-verifying-text" id="lkpVerifyingText">Checking our servers…</div>
+      </div>
+
+      <div class="lkp-actions" id="lkpActions">
+        <button class="lkp-btn lkp-btn-ghost" data-action="not-yet">Not yet</button>
+        <button class="lkp-btn lkp-btn-primary" data-action="verify" id="lkpVerifyBtn">
+          Verify & Unlock
+        </button>
+      </div>
+
+      <div class="lkp-fineprint">
+        <span id="lkpFineprint">Paid just now? Wait 20 seconds before verifying.</span>
+      </div>
+    `);
+
+    const inputWrap = modal.querySelector('#lkpInputWrap');
+    const input = modal.querySelector('#lkpInput');
+    const verifying = modal.querySelector('#lkpVerifying');
+    const verifyingText = modal.querySelector('#lkpVerifyingText');
+    const actions = modal.querySelector('#lkpActions');
+    const icon = modal.querySelector('#lkpIcon');
+    const title = modal.querySelector('#lkpTitle');
+    const subtitle = modal.querySelector('#lkpSubtitle');
+    const fineprint = modal.querySelector('#lkpFineprint');
 
     const close = () => modal.remove();
-    modal.querySelector('.lk-pay-backdrop').onclick = () => { close(); onCancel?.(); };
-    modal.querySelector('.lk-pay-not-yet').onclick = () => { close(); onCancel?.(); };
-    modal.querySelector('.lk-pay-trouble').onclick = () => {
+
+    // Not yet → close
+    modal.querySelector('[data-action="not-yet"]').onclick = () => {
       close();
-      alert('Sorry! Please retry or email sanjaykumarnov12@gmail.com');
-      onCancel?.({ reason: 'payment_trouble' });
+      onCancel?.();
     };
-    modal.querySelector('.lk-pay-success').onclick = async () => {
-      const input = prompt(
-        'Enter the email or phone number you used for payment:\n\n' +
-        '(We\'ll check our server — if you paid, we\'ll unlock it.)'
-      );
-      if (!input || input.trim().length < 3) {
-        alert('Email or phone required. Please check your Razorpay receipt.');
+
+    // Verify
+    modal.querySelector('[data-action="verify"]').onclick = doVerify;
+
+    // Enter key submits
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        doVerify();
+      }
+    });
+
+    async function doVerify() {
+      const value = (input.value || '').trim();
+      if (value.length < 3) {
+        inputWrap.classList.add('lkp-error');
+        setTimeout(() => inputWrap.classList.remove('lkp-error'), 500);
+        input.focus();
         return;
       }
-      const trimmed = input.trim();
-      const isEmail = trimmed.includes('@');
-      const email = isEmail ? trimmed : '';
-      const phone = !isEmail ? trimmed : '';
 
-      const btn = modal.querySelector('.lk-pay-success');
-      btn.textContent = 'Verifying…';
-      btn.disabled = true;
+      // Show verifying state
+      inputWrap.style.display = 'none';
+      actions.style.display = 'none';
+      verifying.style.display = 'flex';
+      fineprint.style.display = 'none';
+
+      const isEmail = value.includes('@');
+      const email = isEmail ? value : '';
+      const phone = !isEmail ? value : '';
+
+      verifyingText.textContent = 'Checking our servers…';
 
       const result = await verifyWithWorker(product, email, phone);
 
       if (result.paid) {
-        close();
-        markPaid(product, price, 'worker-verified');
+        // SUCCESS STATE
+        icon.classList.add('lkp-success');
+        title.textContent = 'Payment verified! 🎉';
+        subtitle.textContent = 'Unlocking your file now…';
+        verifying.style.display = 'none';
+        icon.style.display = 'grid';
+
+        // Save to localStorage
+        markPaid(product, PRICES[product], 'worker-verified', value);
         try {
           localStorage.setItem(`lifekit_paid_${product}`, JSON.stringify({
-            product,
-            amount: price,
-            ts: Date.now(),
-            verified: true,
-            source: 'worker',
-            identity: trimmed,
+            product, amount: PRICES[product], ts: Date.now(),
+            verified: true, source: 'worker', identity: value,
           }));
         } catch (e) {}
-        onSuccess({ product, amount: price, method: 'worker' });
+
+        // Animate & close
+        setTimeout(() => {
+          close();
+          onSuccess({ product, amount: PRICES[product], method: 'worker' });
+        }, 1400);
       } else {
-        btn.textContent = 'Verify & Unlock ✓';
-        btn.disabled = false;
-        alert(
-          'We couldn\'t find a payment for that email/phone.\n\n' +
-          'If you paid, please:\n' +
-          '1. Wait 30 seconds for the server to process\n' +
-          '2. Double-check your email/phone\n' +
-          '3. Try again\n\n' +
-          'Or email sanjaykumarnov12@gmail.com with your Payment ID.'
-        );
+        // ERROR STATE
+        verifying.style.display = 'none';
+        inputWrap.style.display = 'block';
+        actions.style.display = 'grid';
+        fineprint.style.display = 'block';
+
+        title.textContent = 'Payment not found';
+        subtitle.textContent = 'We couldn\'t find a purchase for that email/phone.';
+        icon.classList.add('lkp-error');
+        setTimeout(() => icon.classList.remove('lkp-error'), 600);
+        inputWrap.classList.add('lkp-shake');
+        setTimeout(() => inputWrap.classList.remove('lkp-shake'), 600);
+
+        fineprint.textContent = 'Paid already? Wait 30 sec, check spelling, try again.';
+        fineprint.style.color = 'var(--danger)';
       }
-    };
+    }
   }
 
   // ═══════════════════════════════════════════
-  //   STATE
+  //   MODAL BUILDER
   // ═══════════════════════════════════════════
 
-  function markPaid(product, amount, paymentId) {
+  function createModal(html) {
+    const modal = document.createElement('div');
+    modal.className = 'lkp-modal';
+    modal.innerHTML = `
+      <div class="lkp-backdrop"></div>
+      <div class="lkp-dialog">${html}</div>
+    `;
+    document.body.appendChild(modal);
+
+    // Close on backdrop click
+    modal.querySelector('.lkp-backdrop').onclick = () => {
+      modal.classList.add('lkp-closing');
+      setTimeout(() => modal.remove(), 200);
+    };
+
+    // Esc closes
+    const escHandler = (e) => {
+      if (e.key === 'Escape') {
+        modal.classList.add('lkp-closing');
+        setTimeout(() => modal.remove(), 200);
+        document.removeEventListener('keydown', escHandler);
+      }
+    };
+    document.addEventListener('keydown', escHandler);
+
+    return modal;
+  }
+
+  // ═══════════════════════════════════════════
+  //   STATE HELPERS
+  // ═══════════════════════════════════════════
+
+  function markPaid(product, amount, source, identity) {
     try {
       localStorage.setItem(`lifekit_paid_${product}`, JSON.stringify({
-        product,
-        amount,
-        ts: Date.now(),
-        paymentId: paymentId || null,
-        verified: false,
+        product, amount, ts: Date.now(), source: source || 'manual',
+        identity: identity || null, verified: true,
       }));
     } catch (e) {}
   }
@@ -231,9 +318,7 @@
         return false;
       }
       return true;
-    } catch (e) {
-      return false;
-    }
+    } catch (e) { return false; }
   }
 
   function resetPaid(product) {
@@ -241,55 +326,57 @@
   }
 
   // ═══════════════════════════════════════════
-  //   WORKER VERIFICATION
+  //   WORKER VERIFICATION (with retry)
   // ═══════════════════════════════════════════
 
-  async function verifyWithWorker(product, email, phone) {
-    try {
-      const url = `${WORKER_URL}/verify?product=${encodeURIComponent(product)}&email=${encodeURIComponent(email || '')}&phone=${encodeURIComponent(phone || '')}`;
-      const res = await fetch(url);
-      if (!res.ok) return { paid: false };
-      const data = await res.json();
-      console.log('[Worker] Verify result:', data);
-      return data;
-    } catch (err) {
-      console.error('[Worker] Verify error:', err);
-      return { paid: false };
+  async function verifyWithWorker(product, email, phone, retries = 3) {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        const url = `${WORKER_URL}/verify?product=${encodeURIComponent(product)}&email=${encodeURIComponent(email || '')}&phone=${encodeURIComponent(phone || '')}`;
+        const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+
+        if (!res.ok) {
+          if (res.status === 400) return { paid: false, error: 'Invalid input' };
+          throw new Error(`HTTP ${res.status}`);
+        }
+
+        const data = await res.json();
+        console.log(`[Worker] Verify attempt ${attempt}:`, data);
+        return data;
+      } catch (err) {
+        console.warn(`[Worker] Attempt ${attempt} failed:`, err.message);
+        if (attempt < retries) {
+          await new Promise(r => setTimeout(r, 500 * attempt));
+        } else {
+          return { paid: false, error: err.message };
+        }
+      }
     }
+    return { paid: false };
   }
 
   async function isPaidAsync(product) {
-    // 1. Fast path — localStorage
     if (isPaid(product)) return true;
 
-    // 2. Ask user for email/phone
-    const input = prompt(
-      'Enter the email or phone number you used for payment:\n\n' +
-      '(We\'ll check our server — if you paid, we\'ll unlock it.)'
-    );
-    if (!input || input.trim().length < 3) return false;
-    const trimmed = input.trim();
-    const isEmail = trimmed.includes('@');
-    const email = isEmail ? trimmed : '';
-    const phone = !isEmail ? trimmed : '';
+    // Show animated verify modal
+    return new Promise((resolve) => {
+      showVerifyModal(
+        product,
+        () => resolve(true),
+        () => resolve(false)
+      );
+    });
+  }
 
-    // 3. Query worker
-    const result = await verifyWithWorker(product, email, phone);
-
-    if (result.paid) {
-      try {
-        localStorage.setItem(`lifekit_paid_${product}`, JSON.stringify({
-          product,
-          ts: Date.now(),
-          verified: true,
-          source: 'worker',
-          identity: trimmed,
-        }));
-      } catch (e) {}
-      return true;
-    }
-
-    return false;
+  async function checkExistingPayment(product) {
+    if (isPaid(product)) return true;
+    return new Promise((resolve) => {
+      showVerifyModal(
+        product,
+        () => resolve(true),
+        () => resolve(false)
+      );
+    });
   }
 
   // ═══════════════════════════════════════════
@@ -309,33 +396,403 @@
   checkReturnUrl();
 
   // ═══════════════════════════════════════════
-  //   MODAL STYLES
+  //   STYLES — PREMIUM ANIMATED MODAL
   // ═══════════════════════════════════════════
 
-  function injectModalStyles() {
-    if (document.getElementById('lk-pay-styles')) return;
+  function injectStyles() {
+    if (document.getElementById('lkp-styles')) return;
     const style = document.createElement('style');
-    style.id = 'lk-pay-styles';
+    style.id = 'lkp-styles';
     style.textContent = `
-      .lk-pay-modal { position: fixed; inset: 0; z-index: 2147483646; display: grid; place-items: center; padding: 20px; font-family: 'Inter', system-ui, sans-serif; }
-      .lk-pay-backdrop { position: absolute; inset: 0; background: rgba(8, 6, 15, 0.75); backdrop-filter: blur(12px); animation: lkFade .25s ease; }
-      @keyframes lkFade { from { opacity: 0; } to { opacity: 1; } }
-      .lk-pay-dialog { position: relative; background: linear-gradient(180deg, #131022, #1a1530); border: 1px solid #332a52; border-radius: 20px; padding: 36px 32px 28px; max-width: 460px; width: 100%; text-align: center; color: #f8fafc; box-shadow: 0 40px 100px rgba(0,0,0,0.6); animation: lkSlide .35s cubic-bezier(.2,.8,.2,1); }
-      @keyframes lkSlide { from { opacity: 0; transform: translateY(20px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
-      .lk-pay-icon { font-size: 2.5rem; margin-bottom: 12px; }
-      .lk-pay-dialog h3 { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 8px; color: #fff; }
-      .lk-pay-product { font-size: 0.9rem; color: #9a95b8; margin-bottom: 6px; }
-      .lk-pay-amount { font-size: 2.4rem; font-weight: 900; letter-spacing: -0.03em; background: linear-gradient(135deg, #c026d3, #a855f7, #22d3ee); -webkit-background-clip: text; background-clip: text; color: transparent; line-height: 1; margin: 10px 0 18px; }
-      .lk-pay-note { font-size: 0.88rem; color: #9a95b8; line-height: 1.55; margin-bottom: 22px; max-width: 360px; margin-left: auto; margin-right: auto; }
-      .lk-pay-actions { display: grid; grid-template-columns: 1fr 1.4fr; gap: 10px; margin-bottom: 14px; }
-      .lk-pay-actions-3 { grid-template-columns: 1fr 1fr; }
-      .lk-pay-actions-3 .lk-pay-success { grid-column: span 2; }
-      .lk-pay-actions button { padding: 13px 18px; border-radius: 12px; font-family: inherit; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: transform .15s; border: 1px solid transparent; }
-      .lk-pay-cancel, .lk-pay-not-yet, .lk-pay-trouble { background: #1a1530; color: #9a95b8; border-color: #332a52; }
-      .lk-pay-cancel:hover, .lk-pay-not-yet:hover, .lk-pay-trouble:hover { color: #f8fafc; border-color: #a855f7; }
-      .lk-pay-go, .lk-pay-success { background: linear-gradient(135deg, #a855f7, #c026d3); color: #fff; box-shadow: 0 6px 24px rgba(192,38,211,0.4); }
-      .lk-pay-go:hover, .lk-pay-success:hover { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(192,38,211,0.6); }
-      .lk-pay-fineprint { font-size: 0.72rem; color: #6b6880; margin-top: 6px; line-height: 1.5; }
+      .lkp-modal {
+        position: fixed; inset: 0;
+        z-index: 2147483646;
+        display: grid; place-items: center;
+        padding: 20px;
+        font-family: 'Inter', system-ui, sans-serif;
+      }
+
+      .lkp-backdrop {
+        position: absolute; inset: 0;
+        background: rgba(8, 6, 15, 0.75);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        animation: lkpFadeIn .3s ease;
+      }
+
+      .lkp-closing .lkp-backdrop {
+        animation: lkpFadeOut .2s ease forwards;
+      }
+
+      @keyframes lkpFadeIn { from { opacity: 0; } to { opacity: 1; } }
+      @keyframes lkpFadeOut { from { opacity: 1; } to { opacity: 0; } }
+
+      .lkp-dialog {
+        position: relative;
+        background: linear-gradient(180deg, #131022 0%, #1a1530 100%);
+        border: 1px solid rgba(168, 85, 247, 0.2);
+        border-radius: 24px;
+        padding: 40px 32px 28px;
+        max-width: 440px;
+        width: 100%;
+        text-align: center;
+        color: #f8fafc;
+        box-shadow:
+          0 40px 100px rgba(0, 0, 0, 0.7),
+          0 0 80px rgba(192, 38, 211, 0.15),
+          inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        animation: lkpSlideUp .4s cubic-bezier(.2,.9,.3,1.2);
+        overflow: hidden;
+      }
+
+      .lkp-dialog::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #c026d3, #a855f7, #22d3ee, transparent);
+      }
+
+      .lkp-closing .lkp-dialog {
+        animation: lkpSlideDown .2s ease forwards;
+      }
+
+      @keyframes lkpSlideUp {
+        from { opacity: 0; transform: translateY(30px) scale(0.94); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+      }
+
+      @keyframes lkpSlideDown {
+        from { opacity: 1; transform: translateY(0) scale(1); }
+        to { opacity: 0; transform: translateY(20px) scale(0.96); }
+      }
+
+      /* ══ ICON BADGE ══ */
+      .lkp-icon-badge {
+        width: 72px; height: 72px;
+        border-radius: 22px;
+        display: grid;
+        place-items: center;
+        font-size: 2rem;
+        margin: 0 auto 20px;
+        position: relative;
+        animation: lkpPulse 2s ease-in-out infinite;
+      }
+
+      .lkp-gradient-biodata {
+        background: linear-gradient(135deg, rgba(192, 38, 211, 0.2), rgba(168, 85, 247, 0.15));
+        border: 1px solid rgba(192, 38, 211, 0.35);
+        box-shadow: 0 0 40px rgba(192, 38, 211, 0.4);
+      }
+
+      .lkp-gradient-resume {
+        background: linear-gradient(135deg, rgba(34, 211, 238, 0.2), rgba(56, 189, 248, 0.15));
+        border: 1px solid rgba(34, 211, 238, 0.35);
+        box-shadow: 0 0 40px rgba(34, 211, 238, 0.4);
+      }
+
+      .lkp-gradient-wishes {
+        background: linear-gradient(135deg, rgba(236, 72, 153, 0.2), rgba(192, 38, 211, 0.15));
+        border: 1px solid rgba(236, 72, 153, 0.35);
+        box-shadow: 0 0 40px rgba(236, 72, 153, 0.4);
+      }
+
+      @keyframes lkpPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.06); }
+      }
+
+      /* ══ SUCCESS ICON (verify modal) ══ */
+      .lkp-success-icon {
+        width: 80px; height: 80px;
+        margin: 0 auto 20px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: #a855f7;
+        background: rgba(168, 85, 247, 0.1);
+        border: 2px solid rgba(168, 85, 247, 0.3);
+        transition: all .5s cubic-bezier(.2,.9,.3,1.2);
+        position: relative;
+      }
+
+      .lkp-success-icon svg {
+        width: 44px; height: 44px;
+      }
+
+      .lkp-success-icon .lkp-check-path {
+        stroke-dasharray: 20;
+        stroke-dashoffset: 20;
+        transition: stroke-dashoffset .5s ease;
+      }
+
+      .lkp-success-icon.lkp-success {
+        color: #22c55e;
+        background: rgba(34, 197, 94, 0.15);
+        border-color: rgba(34, 197, 94, 0.5);
+        box-shadow: 0 0 40px rgba(34, 197, 94, 0.5);
+        animation: lkpSuccessPop .5s cubic-bezier(.2,.9,.3,1.5);
+      }
+
+      .lkp-success-icon.lkp-success .lkp-check-path {
+        stroke-dashoffset: 0;
+      }
+
+      @keyframes lkpSuccessPop {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.15); }
+        100% { transform: scale(1); }
+      }
+
+      .lkp-success-icon.lkp-error {
+        color: #ef4444;
+        background: rgba(239, 68, 68, 0.15);
+        border-color: rgba(239, 68, 68, 0.5);
+        animation: lkpErrorShake .5s ease;
+      }
+
+      @keyframes lkpErrorShake {
+        0%, 100% { transform: translateX(0); }
+        20%, 60% { transform: translateX(-8px); }
+        40%, 80% { transform: translateX(8px); }
+      }
+
+      /* ══ TEXT ══ */
+      .lkp-title {
+        font-size: 1.4rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        margin-bottom: 8px;
+        color: #fff;
+        transition: all .3s;
+      }
+
+      .lkp-subtitle {
+        font-size: 0.92rem;
+        color: #9a95b8;
+        line-height: 1.5;
+        margin-bottom: 22px;
+        transition: all .3s;
+      }
+
+      .lkp-price {
+        display: flex;
+        align-items: baseline;
+        justify-content: center;
+        gap: 2px;
+        margin: 10px 0 20px;
+      }
+
+      .lkp-price-currency {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #c026d3;
+      }
+
+      .lkp-price-value {
+        font-size: 3rem;
+        font-weight: 900;
+        letter-spacing: -0.04em;
+        background: linear-gradient(135deg, #c026d3, #a855f7 50%, #22d3ee);
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        line-height: 1;
+        animation: lkpShine 3s linear infinite;
+      }
+
+      @keyframes lkpShine {
+        to { background-position: 200% center; }
+      }
+
+      .lkp-note {
+        font-size: 0.85rem;
+        color: #9a95b8;
+        line-height: 1.55;
+        margin-bottom: 24px;
+        max-width: 340px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      /* ══ INPUT ══ */
+      .lkp-input-wrap {
+        margin-bottom: 20px;
+        transition: all .3s;
+      }
+
+      .lkp-input {
+        width: 100%;
+        background: rgba(8, 6, 15, 0.6);
+        border: 1.5px solid #332a52;
+        border-radius: 14px;
+        padding: 14px 18px;
+        color: #f8fafc;
+        font-family: inherit;
+        font-size: 1rem;
+        outline: none;
+        transition: all .25s;
+        text-align: center;
+      }
+
+      .lkp-input::placeholder {
+        color: #55556a;
+      }
+
+      .lkp-input:focus {
+        border-color: #a855f7;
+        box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.15);
+        background: rgba(8, 6, 15, 0.9);
+      }
+
+      .lkp-input-hint {
+        font-size: 0.75rem;
+        color: #6b6880;
+        margin-top: 8px;
+        text-align: center;
+      }
+
+      .lkp-input-wrap.lkp-error .lkp-input {
+        border-color: #ef4444;
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15);
+      }
+
+      .lkp-input-wrap.lkp-shake {
+        animation: lkpErrorShake .5s ease;
+      }
+
+      /* ══ VERIFYING STATE ══ */
+      .lkp-verifying {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        padding: 24px 0;
+        margin-bottom: 20px;
+      }
+
+      .lkp-spinner {
+        width: 44px;
+        height: 44px;
+        border: 3px solid rgba(168, 85, 247, 0.15);
+        border-top-color: #a855f7;
+        border-right-color: #c026d3;
+        border-radius: 50%;
+        animation: lkpSpin 0.8s linear infinite;
+        box-shadow: 0 0 30px rgba(192, 38, 211, 0.3);
+      }
+
+      @keyframes lkpSpin {
+        to { transform: rotate(360deg); }
+      }
+
+      .lkp-verifying-text {
+        font-size: 0.9rem;
+        color: #9a95b8;
+        font-weight: 500;
+        animation: lkpPulseText 1.5s ease-in-out infinite;
+      }
+
+      @keyframes lkpPulseText {
+        0%, 100% { opacity: 0.6; }
+        50% { opacity: 1; }
+      }
+
+      /* ══ ACTIONS ══ */
+      .lkp-actions {
+        display: grid;
+        grid-template-columns: 1fr 1.6fr;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .lkp-btn {
+        padding: 14px 20px;
+        border-radius: 14px;
+        font-family: inherit;
+        font-size: 0.95rem;
+        font-weight: 700;
+        cursor: pointer;
+        border: 1.5px solid transparent;
+        transition: all .2s cubic-bezier(.2,.9,.3,1.2);
+        letter-spacing: -0.01em;
+      }
+
+      .lkp-btn-ghost {
+        background: transparent;
+        color: #9a95b8;
+        border-color: #332a52;
+      }
+
+      .lkp-btn-ghost:hover {
+        color: #f8fafc;
+        border-color: #a855f7;
+        background: rgba(168, 85, 247, 0.05);
+      }
+
+      .lkp-btn-primary {
+        background: linear-gradient(135deg, #a855f7, #c026d3);
+        color: #fff;
+        box-shadow: 0 6px 24px rgba(192, 38, 211, 0.4);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .lkp-btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 0; left: -100%;
+        width: 100%; height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left .6s;
+      }
+
+      .lkp-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 32px rgba(192, 38, 211, 0.55);
+      }
+
+      .lkp-btn-primary:hover::before {
+        left: 100%;
+      }
+
+      .lkp-btn:active {
+        transform: translateY(0) scale(0.98);
+      }
+
+      /* ══ FOOTER ══ */
+      .lkp-fineprint {
+        font-size: 0.72rem;
+        color: #6b6880;
+        line-height: 1.5;
+        margin-top: 6px;
+        transition: color .3s;
+      }
+
+      .lkp-secure {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        font-size: 0.72rem;
+        color: #6b6880;
+        margin-top: 4px;
+        padding-top: 16px;
+        border-top: 1px solid rgba(51, 42, 82, 0.5);
+      }
+
+      /* ══ MOBILE ══ */
+      @media (max-width: 480px) {
+        .lkp-dialog {
+          padding: 32px 22px 22px;
+          border-radius: 20px;
+        }
+        .lkp-price-value { font-size: 2.4rem; }
+        .lkp-title { font-size: 1.2rem; }
+        .lkp-icon-badge { width: 64px; height: 64px; font-size: 1.7rem; }
+        .lkp-actions { grid-template-columns: 1fr; }
+      }
     `;
     document.head.appendChild(style);
   }
@@ -348,6 +805,7 @@
     openCheckout,
     isPaid,
     isPaidAsync,
+    checkExistingPayment,
     verifyWithWorker,
     resetPaid,
     markPaid,

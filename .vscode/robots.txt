@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://sanjaykumar-tech.github.io/LIFEKit.AI/sitemap.xml

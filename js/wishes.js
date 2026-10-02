@@ -385,19 +385,26 @@
   //   DOWNLOAD BUTTON
   // ═══════════════════════════════════════════
 
-  function handleDownload() {
-    if (!state.paid && !(window.LIFEKitPayment && window.LIFEKitPayment.isPaid('wishes'))) {
-      if (!isFormValid()) {
-        alert('Please fill in the recipient name and a message or headline.');
-        $('toName')?.focus();
-        return;
-      }
-    }
-
+    async function handleDownload() {
     if (state.paid || (window.LIFEKitPayment && window.LIFEKitPayment.isPaid('wishes'))) {
       state.paid = true;
       updateUnlockButton();
       return downloadImage();
+    }
+
+    if (window.LIFEKitPayment && window.LIFEKitPayment.isPaidAsync) {
+      const alreadyPaid = await window.LIFEKitPayment.isPaidAsync('wishes');
+      if (alreadyPaid) {
+        state.paid = true;
+        updateUnlockButton();
+        return downloadImage();
+      }
+    }
+
+    if (!isFormValid()) {
+      alert('Please fill in the recipient name and a message or headline.');
+      $('toName')?.focus();
+      return;
     }
 
     const customerName = $('fromName')?.value || $('toName')?.value || '';

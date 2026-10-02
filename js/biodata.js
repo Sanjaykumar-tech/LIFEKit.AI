@@ -421,22 +421,32 @@
   //   DOWNLOAD BUTTON
   // ═══════════════════════════════════════════
 
-  function handleDownload() {
-    // Block if form not valid AND user hasn't paid
-    if (!state.paid && !(window.LIFEKitPayment && window.LIFEKitPayment.isPaid('biodata'))) {
-      if (!isFormValid()) {
-        alert('Please enter your full name first.');
-        $('name')?.focus();
-        return;
-      }
-    }
-
+    async function handleDownload() {
+    // 1. Fast path — localStorage
     if (state.paid || (window.LIFEKitPayment && window.LIFEKitPayment.isPaid('biodata'))) {
       state.paid = true;
       updateUnlockButton();
       return downloadPDF();
     }
 
+    // 2. Slow path — worker verification (cross-device)
+    if (window.LIFEKitPayment && window.LIFEKitPayment.isPaidAsync) {
+      const alreadyPaid = await window.LIFEKitPayment.isPaidAsync('biodata');
+      if (alreadyPaid) {
+        state.paid = true;
+        updateUnlockButton();
+        return downloadPDF();
+      }
+    }
+
+    // 3. Form validation
+    if (!isFormValid()) {
+      alert('Please enter your full name first.');
+      $('name')?.focus();
+      return;
+    }
+
+    // 4. Fresh payment
     const customerName = $('name')?.value || '';
 
     if (!window.LIFEKitPayment) {

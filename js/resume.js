@@ -562,15 +562,15 @@
     if (state.paid || (window.LIFEKitPayment && window.LIFEKitPayment.isPaid('wishes'))) {
       state.paid = true;
       updateUnlockButton();
-      return downloadImage();
+      return downloadPDF();
     }
 
     if (window.LIFEKitPayment && window.LIFEKitPayment.isPaidAsync) {
-      const alreadyPaid = await window.LIFEKitPayment.isPaidAsync('wishes');
+      const alreadyPaid = await window.LIFEKitPayment.isPaidAsync('resume');
       if (alreadyPaid) {
         state.paid = true;
         updateUnlockButton();
-        return downloadImage();
+        return downloadPDF();
       }
     }
 
@@ -587,11 +587,11 @@
       return;
     }
 
-    window.LIFEKitPayment.openCheckout('wishes', customerName, {
+    window.LIFEKitPayment.openCheckout('resume', customerName, {
       onSuccess: () => {
         state.paid = true;
         updateUnlockButton();
-        setTimeout(() => downloadImage(), 600);
+        setTimeout(() => downloadPDF(), 600);
       },
       onCancel: () => updateUnlockButton(),
     });

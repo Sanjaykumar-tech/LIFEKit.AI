@@ -1,6 +1,5 @@
 /* ═══════════════════════════════════════════
-   LIFEKit AI — Biodata Maker
-   Native jsPDF output + form validation
+   LIFEKit AI — Biodata Maker (Free Mode)
    ═══════════════════════════════════════════ */
 
 (function () {
@@ -8,12 +7,7 @@
 
   const $ = id => document.getElementById(id);
 
-  // ── STATE ─────────────────────────────
-  const state = {
-    template: 'classic',
-    photoData: null,
-    paid: false,
-  };
+  const state = { template: 'classic', photoData: null, paid: false };
 
   const preview    = $('preview');
   const watermark  = $('watermark');
@@ -27,10 +21,6 @@
     'phone','email','address'
   ];
 
-  // ═══════════════════════════════════════════
-  //   FORM VALIDATION
-  // ═══════════════════════════════════════════
-
   function isFormValid() {
     const name = ($('name')?.value || '').trim();
     return name.length >= 2;
@@ -41,33 +31,23 @@
     const navBtn = $('navDownload');
     if (!btn) return;
 
-    const paid = state.paid || (window.LIFEKitPayment && window.LIFEKitPayment.isPaid('biodata'));
+    // 🎁 FREE MODE — always show Download
     const valid = isFormValid();
 
-    if (paid) {
-      btn.disabled = false;
-      btn.style.opacity = '1';
-      btn.style.cursor = 'pointer';
-      btn.textContent = '⬇ Download PDF';
-      if (navBtn) navBtn.textContent = 'Download PDF';
-    } else if (!valid) {
+    if (!valid) {
       btn.disabled = true;
       btn.style.opacity = '0.5';
       btn.style.cursor = 'not-allowed';
-      btn.textContent = '✏️ Enter name to unlock';
+      btn.textContent = '✏️ Enter name to continue';
       if (navBtn) navBtn.textContent = 'Enter name first';
     } else {
       btn.disabled = false;
       btn.style.opacity = '1';
       btn.style.cursor = 'pointer';
-      btn.textContent = '🔓 Unlock HD PDF — ₹99';
-      if (navBtn) navBtn.textContent = 'Download ₹99';
+      btn.textContent = '⬇ Download PDF — FREE';
+      if (navBtn) navBtn.textContent = 'Download Free';
     }
   }
-
-  // ═══════════════════════════════════════════
-  //   TEMPLATE SWITCH
-  // ═══════════════════════════════════════════
 
   document.querySelectorAll('.template-card').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -78,17 +58,10 @@
     });
   });
 
-  // ═══════════════════════════════════════════
-  //   PHOTO UPLOAD
-  // ═══════════════════════════════════════════
-
-  photoInput?.addEventListener('change', e => {
-    const file = e.target.files[0];
+  // PHOTO UPLOAD (Firefox-safe)
+  function handlePhotoFile(file) {
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Photo must be under 5MB.');
-      return;
-    }
+    if (file.size > 5 * 1024 * 1024) { alert('Photo must be under 5MB.'); return; }
     const reader = new FileReader();
     reader.onload = ev => {
       state.photoData = ev.target.result;
@@ -100,42 +73,24 @@
       render();
     };
     reader.readAsDataURL(file);
-  });
+  }
 
-  ['dragenter', 'dragover'].forEach(ev =>
-    photoDrop?.addEventListener(ev, e => {
-      e.preventDefault();
-      photoDrop.classList.add('dragover');
-    })
+  photoInput?.addEventListener('change', e => handlePhotoFile(e.target.files[0]));
+
+  ['dragenter','dragover'].forEach(ev =>
+    photoDrop?.addEventListener(ev, e => { e.preventDefault(); photoDrop.classList.add('dragover'); })
   );
-  ['dragleave', 'drop'].forEach(ev =>
-    photoDrop?.addEventListener(ev, e => {
-      e.preventDefault();
-      photoDrop.classList.remove('dragover');
-    })
+  ['dragleave','drop'].forEach(ev =>
+    photoDrop?.addEventListener(ev, e => { e.preventDefault(); photoDrop.classList.remove('dragover'); })
   );
   photoDrop?.addEventListener('drop', e => {
     const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith('image/')) {
-      photoInput.files = e.dataTransfer.files;
-      photoInput.dispatchEvent(new Event('change'));
-    }
+    if (file && file.type.startsWith('image/')) handlePhotoFile(file);
   });
-
-  // ═══════════════════════════════════════════
-  //   LIVE UPDATE
-  // ═══════════════════════════════════════════
 
   FIELDS.forEach(id => {
-    $(id)?.addEventListener('input', () => {
-      render();
-      updateUnlockButton();
-    });
+    $(id)?.addEventListener('input', () => { render(); updateUnlockButton(); });
   });
-
-  // ═══════════════════════════════════════════
-  //   HELPERS
-  // ═══════════════════════════════════════════
 
   const val = (id, fallback = '—') => {
     const el = $(id);
@@ -147,10 +102,6 @@
   const esc = str => String(str || '')
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-
-  // ═══════════════════════════════════════════
-  //   RENDER PREVIEW
-  // ═══════════════════════════════════════════
 
   function render() {
     const photoHTML = state.photoData
@@ -166,48 +117,31 @@
         </div>
         ${photoHTML}
       </div>
-
-      <div class="bd-doc-section">
-        <h2>Personal</h2>
-        <div class="bd-doc-rows">
-          <div class="bd-doc-row"><strong>Date of Birth</strong><span>${esc(val('dob'))}</span></div>
-          <div class="bd-doc-row"><strong>Height</strong><span>${esc(val('height'))}</span></div>
-          <div class="bd-doc-row"><strong>Religion</strong><span>${esc(val('religion'))}</span></div>
-          <div class="bd-doc-row"><strong>Language</strong><span>${esc(val('language'))}</span></div>
-          <div class="bd-doc-row"><strong>Marital Status</strong><span>${esc(val('marital', 'Never Married'))}</span></div>
-        </div>
-      </div>
-
-      <div class="bd-doc-section">
-        <h2>Education &amp; Career</h2>
-        <div class="bd-doc-rows">
-          <div class="bd-doc-row"><strong>Education</strong><span>${esc(val('education'))}</span></div>
-          <div class="bd-doc-row"><strong>Institute</strong><span>${esc(val('college'))}</span></div>
-          <div class="bd-doc-row"><strong>Occupation</strong><span>${esc(val('job'))}</span></div>
-          <div class="bd-doc-row"><strong>Income</strong><span>${esc(val('income'))}</span></div>
-        </div>
-      </div>
-
-      <div class="bd-doc-section">
-        <h2>Family</h2>
-        <div class="bd-doc-rows">
-          <div class="bd-doc-row"><strong>Father</strong><span>${esc(val('father'))}</span></div>
-          <div class="bd-doc-row"><strong>Occupation</strong><span>${esc(val('fatherJob'))}</span></div>
-          <div class="bd-doc-row"><strong>Mother</strong><span>${esc(val('mother'))}</span></div>
-          <div class="bd-doc-row"><strong>Occupation</strong><span>${esc(val('motherJob'))}</span></div>
-          <div class="bd-doc-row full"><strong>Siblings</strong><span>${esc(val('siblings'))}</span></div>
-        </div>
-      </div>
-
-      <div class="bd-doc-section">
-        <h2>Contact</h2>
-        <div class="bd-doc-rows">
-          <div class="bd-doc-row"><strong>Phone</strong><span>${esc(val('phone'))}</span></div>
-          <div class="bd-doc-row"><strong>Email</strong><span>${esc(val('email'))}</span></div>
-          <div class="bd-doc-row full"><strong>Address</strong><span>${esc(val('address'))}</span></div>
-        </div>
-      </div>
-
+      <div class="bd-doc-section"><h2>Personal</h2><div class="bd-doc-rows">
+        <div class="bd-doc-row"><strong>Date of Birth</strong><span>${esc(val('dob'))}</span></div>
+        <div class="bd-doc-row"><strong>Height</strong><span>${esc(val('height'))}</span></div>
+        <div class="bd-doc-row"><strong>Religion</strong><span>${esc(val('religion'))}</span></div>
+        <div class="bd-doc-row"><strong>Language</strong><span>${esc(val('language'))}</span></div>
+        <div class="bd-doc-row"><strong>Marital Status</strong><span>${esc(val('marital', 'Never Married'))}</span></div>
+      </div></div>
+      <div class="bd-doc-section"><h2>Education &amp; Career</h2><div class="bd-doc-rows">
+        <div class="bd-doc-row"><strong>Education</strong><span>${esc(val('education'))}</span></div>
+        <div class="bd-doc-row"><strong>Institute</strong><span>${esc(val('college'))}</span></div>
+        <div class="bd-doc-row"><strong>Occupation</strong><span>${esc(val('job'))}</span></div>
+        <div class="bd-doc-row"><strong>Income</strong><span>${esc(val('income'))}</span></div>
+      </div></div>
+      <div class="bd-doc-section"><h2>Family</h2><div class="bd-doc-rows">
+        <div class="bd-doc-row"><strong>Father</strong><span>${esc(val('father'))}</span></div>
+        <div class="bd-doc-row"><strong>Occupation</strong><span>${esc(val('fatherJob'))}</span></div>
+        <div class="bd-doc-row"><strong>Mother</strong><span>${esc(val('mother'))}</span></div>
+        <div class="bd-doc-row"><strong>Occupation</strong><span>${esc(val('motherJob'))}</span></div>
+        <div class="bd-doc-row full"><strong>Siblings</strong><span>${esc(val('siblings'))}</span></div>
+      </div></div>
+      <div class="bd-doc-section"><h2>Contact</h2><div class="bd-doc-rows">
+        <div class="bd-doc-row"><strong>Phone</strong><span>${esc(val('phone'))}</span></div>
+        <div class="bd-doc-row"><strong>Email</strong><span>${esc(val('email'))}</span></div>
+        <div class="bd-doc-row full"><strong>Address</strong><span>${esc(val('address')).replace(/\n/g, '<br>')}</span></div>
+      </div></div>
       <div class="bd-doc-footer">
         <span>Generated by <strong>LIFEKit AI</strong></span>
         <span>lifekit.ai</span>
@@ -215,17 +149,7 @@
     `;
   }
 
-  // ═══════════════════════════════════════════
-  //   WATERMARK TOGGLE
-  // ═══════════════════════════════════════════
-
-  $('previewBtn')?.addEventListener('click', () => {
-    watermark?.classList.toggle('hidden');
-  });
-
-  // ═══════════════════════════════════════════
-  //   FULLSCREEN
-  // ═══════════════════════════════════════════
+  $('previewBtn')?.addEventListener('click', () => watermark?.classList.toggle('hidden'));
 
   $('fullscreenBtn')?.addEventListener('click', () => {
     const wrap = preview.cloneNode(true);
@@ -237,10 +161,6 @@
     fs.querySelector('.close-btn').onclick = () => fs.remove();
     fs.addEventListener('click', e => { if (e.target === fs) fs.remove(); });
   });
-
-  // ═══════════════════════════════════════════
-  //   RESET
-  // ═══════════════════════════════════════════
 
   $('resetBtn')?.addEventListener('click', () => {
     if (!confirm('Clear all fields?')) return;
@@ -256,10 +176,6 @@
     updateUnlockButton();
   });
 
-  // ═══════════════════════════════════════════
-  //   PDF GENERATION — native jsPDF
-  // ═══════════════════════════════════════════
-
   async function downloadPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
@@ -271,145 +187,90 @@
     };
     const c = palettes[state.template] || palettes.classic;
 
-    const PAGE_W = 210;
-    const PAGE_H = 297;
-    const M = 18;
-    const CONTENT_W = PAGE_W - M * 2;
+    const PAGE_W = 210, PAGE_H = 297, M = 18, CONTENT_W = PAGE_W - M * 2;
 
-    doc.setFillColor(...c.bg);
-    doc.rect(0, 0, PAGE_W, PAGE_H, 'F');
-
-    doc.setFillColor(...c.primary);
-    doc.rect(0, 0, PAGE_W, 4, 'F');
+    doc.setFillColor(...c.bg); doc.rect(0, 0, PAGE_W, PAGE_H, 'F');
+    doc.setFillColor(...c.primary); doc.rect(0, 0, PAGE_W, 4, 'F');
 
     let y = M + 4;
-
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(24);
-    doc.setTextColor(...c.dark);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(24); doc.setTextColor(...c.dark);
     doc.text(val('name', 'Your Name'), M, y);
-
     y += 7;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.setTextColor(...c.muted);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(...c.muted);
     doc.text('MARRIAGE BIODATA', M, y);
 
     if (state.photoData) {
       try {
-        const imgW = 30;
-        const imgH = 38;
-        doc.addImage(state.photoData, 'JPEG', PAGE_W - M - imgW, M, imgW, imgH, undefined, 'FAST');
-        doc.setDrawColor(...c.primary);
-        doc.setLineWidth(0.6);
+        const imgW = 30, imgH = 38;
+        const fmt = state.photoData.startsWith('data:image/png') ? 'PNG' : 'JPEG';
+        doc.addImage(state.photoData, fmt, PAGE_W - M - imgW, M, imgW, imgH, undefined, 'FAST');
+        doc.setDrawColor(...c.primary); doc.setLineWidth(0.6);
         doc.rect(PAGE_W - M - imgW, M, imgW, imgH);
-      } catch (e) {
-        console.warn('Photo embed failed', e);
-      }
+      } catch (e) { console.warn('Photo embed failed', e); }
     }
 
     y += 6;
-    doc.setDrawColor(...c.primary);
-    doc.setLineWidth(0.6);
+    doc.setDrawColor(...c.primary); doc.setLineWidth(0.6);
     doc.line(M, y, PAGE_W - M, y);
-
     y += 10;
 
     const lineH = 6;
 
     function section(title, rows) {
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(9);
-      doc.setTextColor(...c.accent);
-      doc.text(title.toUpperCase(), M, y);
-      y += 2;
-      doc.setDrawColor(...c.primary);
-      doc.setLineWidth(0.2);
-      doc.line(M, y, M + 30, y);
-      y += 6;
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(...c.accent);
+      doc.text(title.toUpperCase(), M, y); y += 2;
+      doc.setDrawColor(...c.primary); doc.setLineWidth(0.2);
+      doc.line(M, y, M + 30, y); y += 6;
 
       rows.forEach(([label, value]) => {
-        const isFull = label.length > 0 && value.length > 60;
+        const isFull = value.length > 60;
         if (isFull) {
-          doc.setFont('helvetica', 'bold');
-          doc.setFontSize(9.5);
-          doc.setTextColor(80, 80, 90);
-          doc.text(label, M, y);
-          y += lineH;
-
-          doc.setFont('helvetica', 'normal');
-          doc.setTextColor(...c.dark);
+          doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5); doc.setTextColor(80, 80, 90);
+          doc.text(label, M, y); y += lineH;
+          doc.setFont('helvetica', 'normal'); doc.setTextColor(...c.dark);
           const wrapped = doc.splitTextToSize(value, CONTENT_W - 4);
-          doc.text(wrapped, M + 4, y);
-          y += wrapped.length * 5 + 3;
+          doc.text(wrapped, M + 4, y); y += wrapped.length * 5 + 3;
         } else {
-          doc.setFont('helvetica', 'bold');
-          doc.setFontSize(9.5);
-          doc.setTextColor(80, 80, 90);
+          doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5); doc.setTextColor(80, 80, 90);
           doc.text(label, M, y);
-
-          doc.setFont('helvetica', 'normal');
-          doc.setTextColor(...c.dark);
-          const valueX = M + 50;
+          doc.setFont('helvetica', 'normal'); doc.setTextColor(...c.dark);
           const wrapped = doc.splitTextToSize(value, CONTENT_W - 50);
-          doc.text(wrapped, valueX, y);
+          doc.text(wrapped, M + 50, y);
           y += Math.max(lineH, wrapped.length * 5);
         }
-
-        doc.setDrawColor(230, 230, 230);
-        doc.setLineWidth(0.15);
+        doc.setDrawColor(230, 230, 230); doc.setLineWidth(0.15);
         doc.line(M, y - 1.5, PAGE_W - M, y - 1.5);
-
         if (y > PAGE_H - 30) {
           doc.addPage();
-          doc.setFillColor(...c.bg);
-          doc.rect(0, 0, PAGE_W, PAGE_H, 'F');
-          doc.setFillColor(...c.primary);
-          doc.rect(0, 0, PAGE_W, 4, 'F');
+          doc.setFillColor(...c.bg); doc.rect(0, 0, PAGE_W, PAGE_H, 'F');
+          doc.setFillColor(...c.primary); doc.rect(0, 0, PAGE_W, 4, 'F');
           y = M + 4;
         }
       });
-
       y += 4;
     }
 
     section('Personal', [
-      ['Date of Birth', val('dob')],
-      ['Height', val('height')],
-      ['Religion', val('religion')],
-      ['Mother Tongue', val('language')],
-      ['Marital Status', val('marital', 'Never Married')],
+      ['Date of Birth', val('dob')], ['Height', val('height')], ['Religion', val('religion')],
+      ['Mother Tongue', val('language')], ['Marital Status', val('marital', 'Never Married')],
     ]);
-
     section('Education & Career', [
-      ['Education', val('education')],
-      ['Institute', val('college')],
-      ['Occupation', val('job')],
-      ['Annual Income', val('income')],
+      ['Education', val('education')], ['Institute', val('college')],
+      ['Occupation', val('job')], ['Annual Income', val('income')],
     ]);
-
     section('Family', [
-      ['Father', val('father')],
-      ['Father\'s Work', val('fatherJob')],
-      ['Mother', val('mother')],
-      ['Mother\'s Work', val('motherJob')],
+      ['Father', val('father')], ["Father's Work", val('fatherJob')],
+      ['Mother', val('mother')], ["Mother's Work", val('motherJob')],
       ['Siblings', val('siblings')],
     ]);
-
     section('Contact', [
-      ['Phone', val('phone')],
-      ['Email', val('email')],
-      ['Address', val('address')],
+      ['Phone', val('phone')], ['Email', val('email')], ['Address', val('address')],
     ]);
 
     const footerY = PAGE_H - 12;
-    doc.setDrawColor(220, 220, 220);
-    doc.setLineWidth(0.2);
+    doc.setDrawColor(220, 220, 220); doc.setLineWidth(0.2);
     doc.line(M, footerY - 3, PAGE_W - M, footerY - 3);
-
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7.5);
-    doc.setTextColor(150, 150, 155);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(150, 150, 155);
     doc.text('Generated by LIFEKit AI', M, footerY);
     doc.text('lifekit.ai', PAGE_W - M, footerY, { align: 'right' });
 
@@ -417,104 +278,36 @@
     doc.save(`biodata-${safeName}.pdf`);
   }
 
-  // ═══════════════════════════════════════════
-  //   DOWNLOAD BUTTON
-  // ═══════════════════════════════════════════
-
-    async function handleDownload() {
-    // 1. Fast path — localStorage
-    if (state.paid || (window.LIFEKitPayment && window.LIFEKitPayment.isPaid('biodata'))) {
-      state.paid = true;
-      updateUnlockButton();
-      return downloadPDF();
-    }
-
-    // 2. Slow path — worker verification (cross-device)
-    if (window.LIFEKitPayment && window.LIFEKitPayment.isPaidAsync) {
-      const alreadyPaid = await window.LIFEKitPayment.isPaidAsync('biodata');
-      if (alreadyPaid) {
-        state.paid = true;
-        updateUnlockButton();
-        return downloadPDF();
-      }
-    }
-
-    // 3. Form validation
+  async function handleDownload() {
+    // 🎁 FREE MODE — direct download
     if (!isFormValid()) {
       alert('Please enter your full name first.');
       $('name')?.focus();
       return;
     }
-
-    // 4. Fresh payment
-    const customerName = $('name')?.value || '';
-
-    if (!window.LIFEKitPayment) {
-      alert('Payment system not loaded. Please refresh the page.');
-      return;
-    }
-
-    window.LIFEKitPayment.openCheckout('biodata', customerName, {
-      onSuccess: () => {
-        state.paid = true;
-        updateUnlockButton();
-        setTimeout(() => downloadPDF(), 600);
-      },
-      onCancel: () => {
-        updateUnlockButton();
-      },
-    });
+    return downloadPDF();
   }
 
   $('downloadBtn')?.addEventListener('click', handleDownload);
-  $('navDownload')?.addEventListener('click', e => {
-    e.preventDefault();
-    handleDownload();
-  });
-
-  // ═══════════════════════════════════════════
-  //   KEYBOARD SHORTCUTS
-  // ═══════════════════════════════════════════
+  $('navDownload')?.addEventListener('click', e => { e.preventDefault(); handleDownload(); });
 
   document.addEventListener('keydown', e => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-      e.preventDefault();
-      handleDownload();
-    }
-    if (e.key === 'Escape') {
-      document.querySelector('.preview-fullscreen')?.remove();
-    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); handleDownload(); }
+    if (e.key === 'Escape') document.querySelector('.preview-fullscreen')?.remove();
   });
-
-  // ═══════════════════════════════════════════
-  //   RETURN FROM PAYMENT
-  // ═══════════════════════════════════════════
 
   window.addEventListener('lifekit:paid', (e) => {
     if (e.detail.product === 'biodata') {
-      state.paid = true;
-      updateUnlockButton();
+      state.paid = true; updateUnlockButton();
       setTimeout(() => downloadPDF(), 800);
     }
   });
-
-  // ═══════════════════════════════════════════
-  //   PREFILL FROM URL
-  // ═══════════════════════════════════════════
 
   const params = new URLSearchParams(location.search);
   FIELDS.forEach(id => {
     const v = params.get(id);
     if (v && $(id)) $(id).value = v;
   });
-
-  // ═══════════════════════════════════════════
-  //   INIT
-  // ═══════════════════════════════════════════
-
-  if (window.LIFEKitPayment && window.LIFEKitPayment.isPaid('biodata')) {
-    state.paid = true;
-  }
 
   render();
   updateUnlockButton();

@@ -1,6 +1,5 @@
 /* ═══════════════════════════════════════════
-   LIFEKit AI — Wishes Maker
-   PNG export + form validation
+   LIFEKit AI — Wishes Maker (Free Mode)
    ═══════════════════════════════════════════ */
 
 (function () {
@@ -8,7 +7,6 @@
 
   const $ = id => document.getElementById(id);
 
-  // ── STATE ─────────────────────────────
   const state = {
     occasion: 'birthday',
     style: 'gradient',
@@ -30,10 +28,6 @@
     anniversary: 'Happy Anniversary',
   };
 
-  // ═══════════════════════════════════════════
-  //   FORM VALIDATION
-  // ═══════════════════════════════════════════
-
   function isFormValid() {
     const toName = ($('toName')?.value || '').trim();
     const headline = ($('headline')?.value || '').trim();
@@ -41,38 +35,28 @@
     return toName.length >= 2 && (headline.length > 0 || message.length > 0);
   }
 
+  // 🎁 FREE MODE button text
   function updateUnlockButton() {
     const btn = $('downloadBtn');
     const navBtn = $('navDownload');
     if (!btn) return;
 
-    const paid = state.paid || (window.LIFEKitPayment && window.LIFEKitPayment.isPaid('wishes'));
     const valid = isFormValid();
 
-    if (paid) {
-      btn.disabled = false;
-      btn.style.opacity = '1';
-      btn.style.cursor = 'pointer';
-      btn.textContent = '⬇ Download Image';
-      if (navBtn) navBtn.textContent = 'Download';
-    } else if (!valid) {
+    if (!valid) {
       btn.disabled = true;
       btn.style.opacity = '0.5';
       btn.style.cursor = 'not-allowed';
-      btn.textContent = '✏️ Fill card details to unlock';
+      btn.textContent = '✏️ Fill card details first';
       if (navBtn) navBtn.textContent = 'Fill details first';
     } else {
       btn.disabled = false;
       btn.style.opacity = '1';
       btn.style.cursor = 'pointer';
-      btn.textContent = '🔓 Unlock HD Image — ₹19';
-      if (navBtn) navBtn.textContent = 'Download ₹19';
+      btn.textContent = '⬇ Download Image — FREE';
+      if (navBtn) navBtn.textContent = 'Download Free';
     }
   }
-
-  // ═══════════════════════════════════════════
-  //   QUICK TEMPLATES
-  // ═══════════════════════════════════════════
 
   const quickTemplates = {
     birthday: [
@@ -114,10 +98,6 @@
     });
   }
 
-  // ═══════════════════════════════════════════
-  //   OCCASION SWITCH
-  // ═══════════════════════════════════════════
-
   document.querySelectorAll('.occ-card').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.occ-card').forEach(b => b.classList.remove('active'));
@@ -134,10 +114,6 @@
     });
   });
 
-  // ═══════════════════════════════════════════
-  //   STYLE SWITCH
-  // ═══════════════════════════════════════════
-
   document.querySelectorAll('.style-card').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.style-card').forEach(b => b.classList.remove('active'));
@@ -147,10 +123,6 @@
     });
   });
 
-  // ═══════════════════════════════════════════
-  //   LIVE INPUTS
-  // ═══════════════════════════════════════════
-
   ['toName','fromName','headline','message','extra'].forEach(id => {
     $(id)?.addEventListener('input', () => {
       render();
@@ -158,17 +130,9 @@
     });
   });
 
-  // ═══════════════════════════════════════════
-  //   HELPERS
-  // ═══════════════════════════════════════════
-
   const esc = str => String(str || '')
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-
-  // ═══════════════════════════════════════════
-  //   RENDER
-  // ═══════════════════════════════════════════
 
   function render() {
     const to       = ($('toName')?.value || '').trim();
@@ -190,15 +154,7 @@
     `;
   }
 
-  // ═══════════════════════════════════════════
-  //   WATERMARK TOGGLE
-  // ═══════════════════════════════════════════
-
   $('previewBtn')?.addEventListener('click', () => watermark?.classList.toggle('hidden'));
-
-  // ═══════════════════════════════════════════
-  //   FULLSCREEN
-  // ═══════════════════════════════════════════
 
   $('fullscreenBtn')?.addEventListener('click', () => {
     const clone = preview.cloneNode(true);
@@ -210,10 +166,6 @@
     fs.querySelector('.close-btn').onclick = () => fs.remove();
     fs.addEventListener('click', e => { if (e.target === fs) fs.remove(); });
   });
-
-  // ═══════════════════════════════════════════
-  //   RANDOMIZE
-  // ═══════════════════════════════════════════
 
   $('randomizeBtn')?.addEventListener('click', () => {
     const occasions = ['birthday','love','anniversary'];
@@ -239,27 +191,30 @@
     updateUnlockButton();
   });
 
-  // ═══════════════════════════════════════════
-  //   RESET
-  // ═══════════════════════════════════════════
-
   $('resetBtn')?.addEventListener('click', () => {
     if (!confirm('Clear everything?')) return;
+
     ['toName','fromName','headline','message','extra'].forEach(id => {
       const el = $(id); if (el) el.value = '';
     });
+
+    state.occasion = 'birthday';
+    state.style = 'gradient';
+
+    document.querySelectorAll('.occ-card').forEach(b =>
+      b.classList.toggle('active', b.dataset.occasion === 'birthday'));
+    document.querySelectorAll('.style-card').forEach(b =>
+      b.classList.toggle('active', b.dataset.style === 'gradient'));
+
+    const hl = $('headline');
+    if (hl) hl.value = occasionDefaultHeadline[state.occasion];
+
+    renderQuickTemplates();
     render();
     updateUnlockButton();
   });
 
-  // ═══════════════════════════════════════════
-  //   PNG EXPORT
-  // ═══════════════════════════════════════════
-
-  async function downloadImage() {
-    const wasHidden = watermark?.classList.contains('hidden');
-    watermark?.classList.add('hidden');
-
+  function buildExportClone() {
     const clone = preview.cloneNode(true);
     const EXPORT_W = 1080;
     const EXPORT_H = 1350;
@@ -283,6 +238,14 @@
     clone.querySelectorAll('.wc-brand').forEach(el => el.style.fontSize = '18px');
     clone.querySelectorAll('.wc-divider').forEach(el => { el.style.width = '120px'; el.style.margin = '28px 0'; });
 
+    return { clone, EXPORT_W, EXPORT_H };
+  }
+
+  async function downloadImage() {
+    const wasHidden = watermark?.classList.contains('hidden');
+    watermark?.classList.add('hidden');
+
+    const { clone, EXPORT_W, EXPORT_H } = buildExportClone();
     document.body.appendChild(clone);
 
     try {
@@ -309,34 +272,11 @@
     }
   }
 
-  // ═══════════════════════════════════════════
-  //   SHARE
-  // ═══════════════════════════════════════════
-
   async function shareCard() {
     const wasHidden = watermark?.classList.contains('hidden');
     watermark?.classList.add('hidden');
 
-    const clone = preview.cloneNode(true);
-    const EXPORT_W = 1080;
-    const EXPORT_H = 1350;
-
-    Object.assign(clone.style, {
-      position: 'fixed', top: '0', left: '-99999px',
-      width: EXPORT_W + 'px', height: EXPORT_H + 'px',
-      aspectRatio: 'auto', maxWidth: 'none', maxHeight: 'none',
-      padding: '80px 60px', margin: '0', borderRadius: '0',
-      boxShadow: 'none', transform: 'none', fontSize: '22px', zIndex: '1',
-    });
-    clone.querySelectorAll('.wc-occasion').forEach(el => el.style.fontSize = '90px');
-    clone.querySelectorAll('.wc-to').forEach(el => el.style.fontSize = '56px');
-    clone.querySelectorAll('.wc-headline').forEach(el => el.style.fontSize = '68px');
-    clone.querySelectorAll('.wc-message').forEach(el => { el.style.fontSize = '26px'; el.style.maxWidth = '800px'; });
-    clone.querySelectorAll('.wc-extra').forEach(el => el.style.fontSize = '40px');
-    clone.querySelectorAll('.wc-from').forEach(el => el.style.fontSize = '44px');
-    clone.querySelectorAll('.wc-brand').forEach(el => el.style.fontSize = '18px');
-    clone.querySelectorAll('.wc-divider').forEach(el => { el.style.width = '120px'; el.style.margin = '28px 0'; });
-
+    const { clone, EXPORT_W, EXPORT_H } = buildExportClone();
     document.body.appendChild(clone);
 
     try {
@@ -381,57 +321,21 @@
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
-  // ═══════════════════════════════════════════
-  //   DOWNLOAD BUTTON
-  // ═══════════════════════════════════════════
-
-    async function handleDownload() {
-    if (state.paid || (window.LIFEKitPayment && window.LIFEKitPayment.isPaid('wishes'))) {
-      state.paid = true;
-      updateUnlockButton();
-      return downloadImage();
-    }
-
-    if (window.LIFEKitPayment && window.LIFEKitPayment.isPaidAsync) {
-      const alreadyPaid = await window.LIFEKitPayment.isPaidAsync('wishes');
-      if (alreadyPaid) {
-        state.paid = true;
-        updateUnlockButton();
-        return downloadImage();
-      }
-    }
-
+  // 🎁 FREE MODE — Direct download, no payment
+  async function handleDownload() {
     if (!isFormValid()) {
       alert('Please fill in the recipient name and a message or headline.');
       $('toName')?.focus();
       return;
     }
-
-    const customerName = $('fromName')?.value || $('toName')?.value || '';
-
-    if (!window.LIFEKitPayment) {
-      alert('Payment system not loaded. Please refresh.');
-      return;
-    }
-
-    window.LIFEKitPayment.openCheckout('wishes', customerName, {
-      onSuccess: () => {
-        state.paid = true;
-        updateUnlockButton();
-        setTimeout(() => downloadImage(), 600);
-      },
-      onCancel: () => updateUnlockButton(),
-    });
+    return downloadImage();
   }
 
   $('downloadBtn')?.addEventListener('click', handleDownload);
   $('navDownload')?.addEventListener('click', e => { e.preventDefault(); handleDownload(); });
 
+  // Share — no payment prompt, always includes watermark
   $('shareBtn')?.addEventListener('click', async () => {
-    if (!state.paid && !(window.LIFEKitPayment && window.LIFEKitPayment.isPaid('wishes'))) {
-      const ok = confirm('Share will include a small LIFEKit AI watermark.\n\nUnlock HD for ₹19 to remove it.\n\nContinue?');
-      if (!ok) return;
-    }
     await shareCard();
   });
 
@@ -448,18 +352,11 @@
     }
   });
 
-  // ═══════════════════════════════════════════
-  //   INIT
-  // ═══════════════════════════════════════════
-
+  // Init
   const hl = $('headline');
   if (hl) hl.value = occasionDefaultHeadline[state.occasion];
   renderQuickTemplates();
   render();
-
-  if (window.LIFEKitPayment && window.LIFEKitPayment.isPaid('wishes')) {
-    state.paid = true;
-  }
   updateUnlockButton();
 
 })();

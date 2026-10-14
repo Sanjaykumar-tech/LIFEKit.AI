@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="All LIFEKit AI tools — Biodata, Resume, Wishes makers." />
+  <meta name="description" content="All LIFEKit AI tools — Biodata, Resume, Wishes makers. Free forever." />
   <title>All Tools — LIFEKit AI</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -64,16 +64,16 @@
     </a>
     <div class="nav-links">
       <a href="index.html">Home</a>
-      <a href="index.html#pricing">Pricing</a>
-      <a href="tools.html" class="btn-primary">All Tools</a>
+      <a href="tools.html">Tools</a>
+      <a href="tools.html" class="btn-primary">Launch App →</a>
     </div>
   </nav>
 
   <!-- ── HERO ────────────────────────────── -->
   <header class="tools-hero">
-    <span class="badge"><span class="badge-dot"></span> 3 tools live · more coming</span>
+    <span class="badge"><span class="badge-dot"></span> 3 tools live · free forever</span>
     <h1>All <span class="grad">tools</span>.</h1>
-    <p>Every tool does one thing well. Pick one and get your file in seconds.</p>
+    <p>Every tool does one thing well. Pick one and get your file in seconds — completely free.</p>
 
     <!-- FILTER -->
     <div class="tools-filter" id="toolsFilter">
@@ -111,7 +111,9 @@
           <span class="chip">📄 PDF export</span>
         </div>
         <div class="tool-card-foot">
-          <div class="price">₹99<small>once</small></div>
+          <div class="price-free">
+            <span class="free-badge">✨ FREE</span>
+          </div>
           <span class="tool-open-btn">Open Tool <span class="arrow">→</span></span>
         </div>
       </a>
@@ -132,7 +134,9 @@
           <span class="chip">📄 PDF export</span>
         </div>
         <div class="tool-card-foot">
-          <div class="price">₹49<small>once</small></div>
+          <div class="price-free">
+            <span class="free-badge">✨ FREE</span>
+          </div>
           <span class="tool-open-btn">Open Tool <span class="arrow">→</span></span>
         </div>
       </a>
@@ -141,7 +145,7 @@
       <a href="tools/wishes.html" class="tool-card" data-category="card">
         <div class="tool-card-head">
           <div class="card-icon">❤️</div>
-          <span class="tool-tag free">₹19</span>
+          <span class="tool-tag free">✨ Free</span>
         </div>
         <h3>Wishes Maker</h3>
         <p class="desc">
@@ -153,7 +157,9 @@
           <span class="chip">📤 Share</span>
         </div>
         <div class="tool-card-foot">
-          <div class="price">₹19<small>once</small></div>
+          <div class="price-free">
+            <span class="free-badge">✨ FREE</span>
+          </div>
           <span class="tool-open-btn">Open Tool <span class="arrow">→</span></span>
         </div>
       </a>
@@ -172,7 +178,9 @@
           <span class="chip">Coming soon</span>
         </div>
         <div class="tool-card-foot">
-          <div class="price">—</div>
+          <div class="price-free">
+            <span class="free-badge">Coming Soon</span>
+          </div>
           <span class="tool-open-btn">Coming Soon</span>
         </div>
       </div>
@@ -188,8 +196,8 @@
 
   <!-- ── CTA ─────────────────────────────── -->
   <section class="tools-cta">
-    <h2>More tools coming soon.</h2>
-    <p>Invoices, cover letters, notes, and more — all built the same way: fill, preview, print.</p>
+    <h2>All tools. All free. Forever.</h2>
+    <p>No payment. No signup. No limits. Just pick a tool and download your file.</p>
     <a href="index.html" class="btn-primary">← Back to Home</a>
   </section>
 
@@ -210,7 +218,7 @@
           LIFEKit <span class="ai">AI</span>
         </div>
         <p style="color: var(--muted); font-size: .9rem; max-width: 280px;">
-          Small tools. Big time saved. Built for real life.
+          Small tools. Big time saved. Free for everyone.
         </p>
       </div>
       <div>
@@ -244,6 +252,34 @@
       <span>Made with 💜 in India</span>
     </div>
   </footer>
+
+  <!-- ── FREE BADGE STYLES ───────────────── -->
+  <style>
+    .price-free {
+      display: flex;
+      align-items: center;
+    }
+    .free-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.18), rgba(34, 211, 238, 0.12));
+      border: 1.5px solid rgba(34, 197, 94, 0.45);
+      color: #22c55e;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      box-shadow: 0 0 20px rgba(34, 197, 94, 0.25);
+      animation: freePulse 2.4s ease-in-out infinite;
+    }
+    @keyframes freePulse {
+      0%, 100% { box-shadow: 0 0 20px rgba(34, 197, 94, 0.25); }
+      50% { box-shadow: 0 0 32px rgba(34, 197, 94, 0.5); }
+    }
+  </style>
 
   <!-- ── SCRIPTS ─────────────────────────── -->
   <script src="js/cursor.js" defer></script>
